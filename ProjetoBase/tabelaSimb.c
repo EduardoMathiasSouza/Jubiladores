@@ -1,0 +1,158 @@
+#include "tabelaSimb.h"
+
+void cria_pilha(pilha_simbolos *symbolsTable){
+    symbolsTable->topo = NULL;
+    symbolsTable->tamanho = 0;
+}
+
+void push(pilha_simbolos *symbolsTable, stackNode *newSymbol){
+    newSymbol->prox = symbolsTable->topo;
+    symbolsTable->topo = newSymbol;
+    symbolsTable->tamanho++;
+}
+stackNode* getTop(pilha_simbolos *symbolsTable){
+    if(symbolsTable->tamanho == 0){
+        printf("Pilha vazia!");
+        return NULL;
+    }
+    return symbolsTable->topo;
+}
+stackNode* getNth(pilha_simbolos *symbolsTable, int n){
+    if(symbolsTable->tamanho == 0){
+        printf("Pilha vazia!");
+        return NULL;
+    }
+    stackNode *aux = symbolsTable->topo;
+    for(int i = 0; i < n; i++){
+        aux = aux->prox;
+    }
+    return aux;
+}
+stackNode* search(pilha_simbolos *symbolsTable, char *identificador){
+    stackNode *aux = symbolsTable->topo;
+    while(aux != NULL){
+        if(strcmp(aux->identificador, identificador) == 0){
+            return aux;
+        }
+        aux = aux->prox;
+    }
+    return NULL;
+}
+void pop(pilha_simbolos *symbolsTable, int n){
+    if(symbolsTable->tamanho == 0){
+        printf("Pilha vazia!");
+        exit(1);
+    }
+    stackNode *aux = symbolsTable->topo;
+    for(int i = 0; i < n; i++){
+        aux = aux->prox;
+    }
+    symbolsTable->topo = aux->prox;
+    free(aux);
+    symbolsTable->tamanho--;
+}
+stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displacement){
+    stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
+
+    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    strcpy(newNode->identificador, identificador);
+    
+    newNode->category = Variavel_simples;
+    newNode->lexicalLevel = lexicalLevel;
+    newNode->displacement = displacement;
+    newNode->tipo = naosei;
+
+    return newNode;
+}
+
+stackNode* createSimpleFunctionInput(char *identificador, char *label, int lexicalLevel, int numParams, tipoPascal returnType){
+    stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
+
+    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    strcpy(newNode->identificador, identificador);
+    
+    newNode->category = funcao;
+    newNode->lexicalLevel = lexicalLevel;
+    newNode->displacement = -4-numParams;
+    newNode->params = NULL;
+    newNode->tipo = returnType;
+    newNode->label = (char*)malloc(strlen(label) * sizeof(char));
+    strcpy(newNode->label, label);
+    newNode->numParams = numParams;
+
+    return newNode;
+}
+stackNode* createSimpleProcedureInput(char *identificador, char *label, int lexicalLevel, int numParams){
+    stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
+
+    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    strcpy(newNode->identificador, identificador);
+    
+    newNode->category = procedimento;
+    newNode->lexicalLevel = lexicalLevel;
+    newNode->numParams = numParams;
+    newNode->params = NULL;
+    newNode->label = (char*)malloc(strlen(label) * sizeof(char));
+    strcpy(newNode->label, label);
+
+
+    return newNode;
+}
+stackNode* createSimpleFormalParameterInput(char *identificador, int lexicalLevel, int displacement, tipo_passado pass){
+    stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
+
+    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    strcpy(newNode->identificador, identificador);
+    
+    newNode->category = Parametro_formal;
+    newNode->lexicalLevel = lexicalLevel;
+    newNode->displacement = displacement;
+    newNode->tipo = naosei;
+    newNode->pass = pass;
+
+    return newNode;
+}
+void setTypes(pilha_simbolos *symbolsTable, tipoPascal tipo, int n){
+    if(symbolsTable->tamanho == 0){
+        printf("Pilha vazia!");
+        exit(1);
+    }
+    int i = 0;
+    stackNode *aux = symbolsTable->topo;
+    while((i < n) && (aux != NULL)){
+        aux->tipo = tipo;
+        aux = aux->prox;
+        i++;
+    }
+}
+
+void printTable(pilha_simbolos *symbolsTable){
+    stackNode *aux = symbolsTable->topo;
+    while(aux != NULL){
+        printf("identificador: %s | ", aux->identificador);
+        printf("Category: %d | ", aux->category);
+        printf("Lexical Level: %d | ", aux->lexicalLevel);
+        printf("Displacement: %d | ", aux->displacement);
+        printf("Type: %d | ", aux->tipo);
+        printf("Label: %s | ", aux->label);
+        printf("Num Params: %d | ", aux->numParams);
+        printf("Pass: %d | ", aux->pass);
+        aux = aux->prox;
+    }
+}
+void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount){
+    if (symbolsTable->tamanho < parameterCount)
+		puts("Pilha não tem elementos o suficiente");
+	p->numParams = parameterCount;
+	p->params = (paramDesc*)malloc(parameterCount * sizeof(paramDesc));
+	stackNode *aux = symbolsTable->topo;
+	for (int i = 0; i < parameterCount; i++) {
+		p->params[i].identificador = (char*)malloc(strlen(aux->identificador)*sizeof(char));
+		strcpy(p->params[i].identificador, aux->identificador);
+		p->params[i].tipo = aux->tipo;
+		p->params[i].pass = aux->pass;
+		aux->displacement = -4-i;
+		aux = aux->prox;
+	}
+	aux->numParams = parameterCount;
+}
