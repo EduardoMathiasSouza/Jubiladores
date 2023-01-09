@@ -60,7 +60,15 @@ extern int yydebug;
     T_END = 266,
     VAR = 267,
     IDENT = 268,
-    ATRIBUICAO = 269
+    ATRIBUICAO = 269,
+    WHILE = 270,
+    DO = 271,
+    IF = 272,
+    THEN = 273,
+    ELSE = 274,
+    NUMERO = 275,
+    READ = 276,
+    WRITE = 277
   };
 #endif
 
