@@ -13,6 +13,7 @@
 #include "pilha.h"
 
 int procs;
+int receivingByReference;
 int num_vars, novas_var, nivel_lexico, deslocamento;
 pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *loadedVariable;
@@ -31,7 +32,7 @@ programa    :{
              geraCodigo (NULL, "INPP");
              }
              PROGRAM IDENT
-             ABRE_PARENTESES  FECHA_PARENTESES PONTO_E_VIRGULA
+			 parametros_vazio PONTO_E_VIRGULA
              bloco PONTO {
                pop(&tabelaSimbolos, num_vars + procs);
                char dmem[1000];
@@ -40,6 +41,17 @@ programa    :{
                geraCodigo (NULL, "PARA");
              }
 ;
+
+parametros_vazio:
+	parametros
+	| comando_vazio
+;
+
+parametros:
+	ABRE_PARENTESES lista_idents FECHA_PARENTESES
+;
+
+
 
 bloco       :
               parte_declara_vars
@@ -95,14 +107,14 @@ lista_id_var: lista_id_var VIRGULA IDENT
 
 lista_idents: lista_idents VIRGULA IDENT{
 		novas_var++;
-		novaEntrada = createSimpleFormalParameterInput(token, lexicalLevel, 1, receivingByReference ? reference : value);
-		push(&symbolsTable, novaEntrada);
+		novaEntrada = createSimpleFormalParameterInput(token, nivel_lexico, 1, receivingByReference ? referencia : valor);
+		push(&tabelaSimbolos, novaEntrada);
 	}
    	| IDENT
 	{
 		novas_var++;
-		newInput = createSimpleFormalParameterInput(token, lexicalLevel, 1, receivingByReference ? reference : value);
-		push(&symbolsTable, novaEntrada);
+		novaEntrada = createSimpleFormalParameterInput(token, nivel_lexico, 1, receivingByReference ? referencia : valor);
+		push(&tabelaSimbolos, novaEntrada);
 	}
 ;
 
@@ -270,7 +282,9 @@ int main (int argc, char** argv) {
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
-
+   cria_pilha(&tabelaSimbolos);
+   cria_pilhaTipo(&tabelaTipo);
+   receivingByReference = 0;
    yyin=fp;
    yyparse();
 
