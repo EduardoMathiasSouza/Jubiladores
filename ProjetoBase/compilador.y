@@ -12,6 +12,7 @@
 #include "tabelaSimb.h"
 #include "pilha.h"
 
+int procs;
 int num_vars, novas_var, nivel_lexico, deslocamento;
 pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada;
@@ -29,6 +30,10 @@ programa    :{
              PROGRAM IDENT
              ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
              bloco PONTO {
+             pop(&tabelaSimbolos, num_vars + procs);
+             char dmem[1000];
+             sprinf(dmem, "DMEM %d", num_vars);
+             geraCodigo(NULL, dmem);
              geraCodigo (NULL, "PARA");
              }
 ;
@@ -94,8 +99,6 @@ lista_idents: lista_idents VIRGULA IDENT
 
 
 comando_composto: T_BEGIN comandos T_END
-
-comandos:
 ;
 
 
