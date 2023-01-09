@@ -9,15 +9,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabelaSimb.h"
+#include "pilha.h"
 
-int num_vars;
+int num_vars, novas_var, nivel_lexico, deslocamento;
+pilha_simbolos tabelaSimbolos;
+stackNode *novaEntrada;
 
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
-
 %%
 
 programa    :{
@@ -41,22 +44,29 @@ bloco       :
 
 
 
-parte_declara_vars:  var
+parte_declara_vars:  var {
+      char amem[100];
+		sprintf(amem, "AMEM %d", num_vars);
+		geraCodigo(NULL, amem); 
+} 
 ;
 
 
-var         : { } VAR declara_vars
-            |
+var         : VAR declara_vars
+            | declara_vars
 ;
 
 declara_vars: declara_vars declara_var
             | declara_var
 ;
 
-declara_var : { }
+declara_var : { 
+               novas_var = 0; 
+}
               lista_id_var DOIS_PONTOS
               tipo
-              { /* AMEM */
+              {
+                num_vars += novas_var;
               }
               PONTO_E_VIRGULA
 ;
@@ -65,8 +75,17 @@ tipo        : IDENT
 ;
 
 lista_id_var: lista_id_var VIRGULA IDENT
-              { /* insere �ltima vars na tabela de s�mbolos */ }
-            | IDENT { /* insere vars na tabela de s�mbolos */}
+              { /* insere �ltima vars na tabela de s�mbolos */ 
+                novas_var++;
+                novaEntrada = createSimpleVarInput(token, nivel_lexico, deslocamento);
+                push(&tabelaSimbolos, novaEntrada);
+                deslocamento++;}
+            | IDENT { /* insere vars na tabela de s�mbolos *0/
+                novas_var++;
+                novaEntrada = createSimpleVarInput(token, nivel_lexico, deslocamento);
+                push(&tabelaSimbolos, novaEntrada);
+                deslocamento++;
+                }
 ;
 
 lista_idents: lista_idents VIRGULA IDENT
