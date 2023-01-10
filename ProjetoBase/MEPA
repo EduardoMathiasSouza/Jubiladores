@@ -1,4 +1,8 @@
      INPP
-     AMEM 2
-     DMEM 2
+     AMEM 5
+     CRCT 0
+     ARMZ 0,2
+     LEIT
+     ARMZ 0,3 
+     DMEM 5
      PARA

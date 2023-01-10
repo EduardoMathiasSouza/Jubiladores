@@ -14,9 +14,12 @@
 
 int procs;
 int receivingByReference;
+int newParams;
 int num_vars, novas_var, nivel_lexico, deslocamento;
+int lexicalLevel = 0;
+char comparacao[100];
 pilha_simbolos tabelaSimbolos;
-stackNode *novaEntrada, *variavelDestino, *loadedVariable;
+stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
 
 %}
@@ -25,14 +28,21 @@ pilhaTipo tabelaTipo;
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
 %token WHILE DO IF THEN ELSE 
+%token MAIOR MENOR MAIOR_IGUAL MENOR_IGUAL IGUAL DIFERENTE
+%token SOMA SUBTRACAO MULTIPLICACAO DIVISAO
 %token NUMERO READ WRITE
+%token OR AND NOT
+
+%nonassoc NADA
+
+
 %%
 
 programa    :{
              geraCodigo (NULL, "INPP");
              }
              PROGRAM IDENT
-			 parametros_vazio PONTO_E_VIRGULA
+			 parametros_ou_vazio PONTO_E_VIRGULA
              bloco PONTO {
                pop(&tabelaSimbolos, num_vars + procs);
                char dmem[1000];
@@ -42,7 +52,7 @@ programa    :{
              }
 ;
 
-parametros_vazio:
+parametros_ou_vazio:
 	parametros
 	| comando_vazio
 ;
@@ -78,7 +88,7 @@ declara_vars: declara_vars declara_var
 ;
 
 declara_var : { 
-               novas_var = 0; 
+              novas_var = 0; 
 }
               lista_id_var DOIS_PONTOS
               tipo
@@ -169,9 +179,81 @@ chama_procedimento:
 {}
 ;
 
+lista_expressoes: expressao | expressao VIRGULA lista_expressoes;
+
 expressao:
-{}
+   	{ newParams++; } expressao_simples  relacao_exp_simples_ou_vazio 
 ;
+
+relacao_exp_simples_ou_vazio:
+	relacao expressao_simples
+	{ 
+		verifica_tipo(&tabelaTipo, "relacional");
+		geraCodigo(NULL, comparacao);
+	}
+	| comando_vazio
+;
+
+relacao:
+	IGUAL { strcpy(comparacao, "CMIG"); } 
+	| DIFERENTE { strcpy(comparacao, "CMDG"); } 
+	| MENOR { strcpy(comparacao, "CMME"); } 
+	| MENOR_IGUAL { strcpy(comparacao, "CMEG"); } 
+	| MAIOR_IGUAL { strcpy(comparacao, "CMAG"); } 
+	| MAIOR { strcpy(comparacao, "CMMA"); } 
+;
+
+expressao_simples:
+   	soma_ou_vazio expressao_lista_termo
+;
+
+soma_ou_vazio:
+	SOMA| SUBTRACAO | comando_vazio;
+;
+
+expressao_lista_termo:
+	expressao_lista_termo lista_termo 
+	| termo 
+;
+
+lista_termo:
+	SOMA termo { 
+		verifica_tipo(&tabelaTipo, "soma"); 
+		geraCodigo(NULL, "SOMA");}
+	| SUBTRACAO termo { 
+		verifica_tipo(&tabelaTipo, "subtracao"); 
+		geraCodigo(NULL, "SUBT");}
+	| OR termo { 
+		verifica_tipo(&tabelaTipo, "or"); 
+		geraCodigo(NULL, "DISJ");}
+;
+
+termo:
+	termo lista_fator 
+	| fator 
+;
+
+lista_fator:
+	MULTIPLICACAO fator { 
+		verifica_tipo(&tabelaTipo, "multiplicacao"); 
+		geraCodigo(NULL, "MULT");}
+	| DIVISAO fator { 
+		verifica_tipo(&tabelaTipo, "divisao");
+		geraCodigo(NULL, "DIVI"); }
+	| AND fator { 
+		verifica_tipo(&tabelaTipo, "and"); 
+		geraCodigo(NULL, "CONJ"); }
+;
+
+fator:
+	variavel
+	| numero
+	| ABRE_PARENTESES expressao FECHA_PARENTESES
+	| NOT fator
+;
+
+
+
 
 atribuicao_procedimento:
 	atribuicao
@@ -181,7 +263,7 @@ atribuicao_procedimento:
 atribuicao:
 	ATRIBUICAO expressao
 	{
-		verifica_tipo(&tabelaTipo, "atribuicao");
+		//verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
 		sprintf(varLexDisp, "ARMZ %d,%d", variavelDestino->lexicalLevel, variavelDestino->displacement);
 		geraCodigo(NULL, varLexDisp); 
@@ -200,22 +282,22 @@ variavel:
 			push_pilhaTipo(&tabelaTipo, variavelDestino->tipo);
 		}
 		else { 
-			loadedVariable = search(&tabelaSimbolos, token);
-			if(loadedVariable == NULL) {
+			variavel_carregada = search(&tabelaSimbolos, token);
+			if(variavel_carregada == NULL) {
 				printf("Variavel %s nao encontrada.\n", token);
 				exit(1);
 			}
-			push_pilhaTipo(&tabelaTipo, loadedVariable->tipo);
+			push_pilhaTipo(&tabelaTipo, variavel_carregada->tipo);
 		}
    	}
 ;
 
-
 numero:
 	NUMERO
 	{
+		printf("ENTREI");
 		push_pilhaTipo(&tabelaTipo, integer);
-      char totalVars[100];
+        char totalVars[100];
 		sprintf(totalVars, "CRCT %s", token);
 		geraCodigo(NULL, totalVars); 
 	}

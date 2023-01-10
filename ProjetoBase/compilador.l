@@ -113,6 +113,66 @@ end { simbolo = simb_end;
           return FECHA_PARENTESES;
  }
 
+read { simbolo = simb_read;
+              strncpy (token, yytext, TAM_TOKEN);
+              IMPRIME("read");
+              return READ;
+}
+
+write { simbolo = simb_write;
+              strncpy (token, yytext, TAM_TOKEN);
+              IMPRIME("write");
+              return WRITE;
+}
+
+or { simbolo = simb_ou;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("ou");
+        return OR;
+}
+
+and { simbolo = simb_e;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("e");
+        return AND;
+}
+
+not { simbolo = simb_nao;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("nao");
+        return NOT;
+}
+
+\+ { simbolo = simb_mais;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("soma");
+        return SOMA;
+}
+
+\- { simbolo = simb_menos;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("subtracao");
+        return SUBTRACAO;
+}
+
+\* { simbolo = simb_vezes;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("multiplicacao");
+        return MULTIPLICACAO;
+}
+
+\/ { simbolo = simb_divisao;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("divisao");
+        return DIVISAO;
+}
+
+{numero} { simbolo = simb_numero;
+          strncpy (token, yytext, TAM_TOKEN);
+          IMPRIME(" numero  ");
+          return NUMERO;
+          }
+
 {ident} { simbolo = simb_identificador;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" ident  ");

@@ -9,6 +9,8 @@ void push(pilha_simbolos *symbolsTable, stackNode *newSymbol){
     newSymbol->prox = symbolsTable->topo;
     symbolsTable->topo = newSymbol;
     symbolsTable->tamanho++;
+    printf("Pushed %s", newSymbol->identificador);
+    printf("Tamanho: %d",symbolsTable->tamanho);
 }
 stackNode* getTop(pilha_simbolos *symbolsTable){
     if(symbolsTable->tamanho == 0){
@@ -38,18 +40,18 @@ stackNode* search(pilha_simbolos *symbolsTable, char *identificador){
     }
     return NULL;
 }
+
 void pop(pilha_simbolos *symbolsTable, int n){
     if(symbolsTable->tamanho == 0){
         printf("Pilha vazia!");
-        exit(1);
-    }
-    stackNode *aux = symbolsTable->topo;
+        exit(1);}
+    stackNode *aux;
     for(int i = 0; i < n; i++){
-        aux = aux->prox;
+        aux = symbolsTable->topo;
+        symbolsTable->topo = aux->prox;
+        free(aux);
+        symbolsTable->tamanho--;
     }
-    symbolsTable->topo = aux->prox;
-    free(aux);
-    symbolsTable->tamanho--;
 }
 stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displacement){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
