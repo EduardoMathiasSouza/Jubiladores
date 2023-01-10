@@ -53,3 +53,52 @@ void print_tabelatipo(pilhaTipo *typesTable){
         aux = aux->prox;    
     }
 }
+
+
+char* geraRotulo(int rotId){
+    char *rotulo = (char*)malloc(10 * sizeof(char));
+    sprintf(rotulo, "R%d", rotId);
+    return rotulo;
+}
+
+void cria_pilhaRotulo(pilhaRotulo *tabelaRot){
+    tabelaRot->topo = NULL;
+    tabelaRot->tamanho = 0;
+}
+
+void push_pilhaRotulo(pilhaRotulo *tabelaRot, char *novoRot){
+    RotuloNodo *novo = (RotuloNodo*) malloc(sizeof(RotuloNodo));
+    novo->rot = (char*)malloc(strlen(novoRot) * sizeof(char));
+    strcpy(novo->rot, novoRot);
+    novo->prox = tabelaRot->topo;
+    tabelaRot->topo = novo;
+    tabelaRot->tamanho++;
+}
+
+void pop_pilhaRotulo(pilhaRotulo *tabelaRot, int n){
+    if(tabelaRot->tamanho == 0){
+        printf("Pilha de Rotulos vazia!");
+        exit(1);
+    }
+    RotuloNodo *aux;
+    for(int i = 0; i < n; i++){
+        aux =  tabelaRot->topo;
+        tabelaRot->topo = aux->prox;
+        free(aux);
+        tabelaRot->tamanho--;
+    }
+}
+
+char* getRotulo(pilhaRotulo *tabelaRot, int n){
+    if(tabelaRot->tamanho == 0){
+        printf("Pilha de Rotulos vazia!");
+        exit(1);
+    }
+    RotuloNodo *aux = tabelaRot->topo;
+	if (!n){ 
+        n++;}
+	while (--n){
+		aux = aux->prox;}
+    return aux->rot;
+}
+
