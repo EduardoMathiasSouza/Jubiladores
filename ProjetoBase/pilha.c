@@ -13,7 +13,6 @@ void push_pilhaTipo(pilhaTipo *typesTable, tipoPascal type){
     typesTable->tamanho++;
 }
 tipoPascal pop_pilhaTipo(pilhaTipo *typesTable){
-    printf("ENTREI");
     if(typesTable->tamanho == 0){
         printf("Pilha vazia!");
         exit(1);
@@ -57,7 +56,7 @@ void print_tabelatipo(pilhaTipo *typesTable){
 
 char* geraRotulo(int rotId){
     char *rotulo = (char*)malloc(10 * sizeof(char));
-    sprintf(rotulo, "R%d", rotId);
+    sprintf(rotulo, "R%02d", rotId);
     return rotulo;
 }
 

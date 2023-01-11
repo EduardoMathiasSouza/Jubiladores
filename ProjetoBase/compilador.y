@@ -16,17 +16,20 @@ int procs;
 int receivingByReference;
 int newParams;
 int num_vars, novas_var, nivel_lexico, deslocamento;
+int RotId = 0;
 int lexicalLevel = 0;
 char comparacao[100];
 pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
+pilhaRotulo tabelaRotulos;
 
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
 %token VIRGULA PONTO_E_VIRGULA DOIS_PONTOS PONTO
 %token T_BEGIN T_END VAR IDENT ATRIBUICAO
+%token INTEGER
 %token WHILE DO IF THEN ELSE 
 %token MAIOR MENOR MAIOR_IGUAL MENOR_IGUAL IGUAL DIFERENTE
 %token SOMA SUBTRACAO MULTIPLICACAO DIVISAO
@@ -59,6 +62,10 @@ parametros_ou_vazio:
 
 parametros:
 	ABRE_PARENTESES lista_idents FECHA_PARENTESES
+;
+
+tipo:
+	INTEGER { setTypes(&tabelaSimbolos, integer, novas_var); }
 ;
 
 
@@ -98,8 +105,6 @@ declara_var : {
               PONTO_E_VIRGULA
 ;
 
-tipo        : IDENT
-;
 
 lista_id_var: lista_id_var VIRGULA IDENT
               { /* insere �ltima vars na tabela de s�mbolos */ 
@@ -163,21 +168,52 @@ desvio:
    { }
 ;
 
-comando_composto:
-{}
-;
-
 comando_condicional:
 {}
 ;
 
-comando_repetitivo:
-{}
-;
 
 chama_procedimento:
 {}
 ;
+
+comando_repetitivo:
+	WHILE
+	{
+		char *RotWhileInicio = geraRotulo(RotId);
+		RotId++;
+		char *RotWhileFim = geraRotulo(RotId);
+		RotId++;
+
+		push_pilhaRotulo(&tabelaRotulos, RotWhileInicio);
+		push_pilhaRotulo(&tabelaRotulos, RotWhileFim);
+
+		char rot[100];
+        sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(NULL,rot); 
+	}
+	expressao DO
+	{
+		char dsvf[100];
+		sprintf(dsvf, "DSVF %s", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(NULL, dsvf);
+	}
+	comando_composto
+	{ 
+		char dsvs[100];
+		sprintf(dsvs, "DSVS %s", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(NULL, dsvs);
+
+		char rot[100];
+		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(NULL, rot);
+
+		pop_pilhaRotulo(&tabelaRotulos, 2);
+	}
+;
+
+
+
 
 lista_expressoes: expressao | expressao VIRGULA lista_expressoes;
 
@@ -246,14 +282,58 @@ lista_fator:
 ;
 
 fator:
-	variavel
+	variavel %prec NADA
+	{
+		if(variavel_carregada != NULL) {
+			if(variavel_carregada->category == funcao) {
+				char chamaProcedure[100];
+				sprintf(chamaProcedure, "CHPR %s,%d", variavel_carregada->rotulo, lexicalLevel);
+				geraCodigo(NULL, chamaProcedure);
+			}
+			else {
+				char comando[100];
+				sprintf(comando, "CRVL %d,%d", variavel_carregada->lexicalLevel, variavel_carregada->displacement);
+				variavel_carregada = NULL;
+				geraCodigo(NULL, comando);
+			}
+		}
+		else {
+			if(variavelDestino->category == funcao) {
+				char chamaProcedure[100];
+				sprintf(chamaProcedure, "CHPR %s, %d", variavelDestino->rotulo, lexicalLevel);
+				geraCodigo(NULL, chamaProcedure);
+			}
+			else {
+				char comando[100];
+				sprintf(comando, "CRVL %d,%d", variavelDestino->lexicalLevel, variavelDestino->displacement);
+				variavelDestino = NULL;
+				geraCodigo(NULL, comando);
+			}
+		}
+	}
+	| variavel ABRE_PARENTESES
+	{
+		if(variavel_carregada != NULL) {
+			if(variavel_carregada->category == funcao) {
+				procedimentoAtual = variavel_carregada;
+			}
+		}
+		else {
+			if(variavelDestino->category == funcao) {
+				procedimentoAtual = variavelDestino;
+			}
+		}
+	}
+	lista_expressoes FECHA_PARENTESES
+	{ 
+		char chamaProcedure[100];
+		sprintf(chamaProcedure, "CHPR %s, %d", procedimentoAtual->rotulo, lexicalLevel);
+		geraCodigo(NULL, chamaProcedure);
+	}
 	| numero
 	| ABRE_PARENTESES expressao FECHA_PARENTESES
 	| NOT fator
 ;
-
-
-
 
 atribuicao_procedimento:
 	atribuicao
@@ -263,7 +343,7 @@ atribuicao_procedimento:
 atribuicao:
 	ATRIBUICAO expressao
 	{
-		//verifica_tipo(&tabelaTipo, "atribuicao");
+		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
 		sprintf(varLexDisp, "ARMZ %d,%d", variavelDestino->lexicalLevel, variavelDestino->displacement);
 		geraCodigo(NULL, varLexDisp); 
@@ -295,7 +375,6 @@ variavel:
 numero:
 	NUMERO
 	{
-		printf("ENTREI");
 		push_pilhaTipo(&tabelaTipo, integer);
         char totalVars[100];
 		sprintf(totalVars, "CRCT %s", token);
@@ -366,6 +445,7 @@ int main (int argc, char** argv) {
  * ------------------------------------------------------------------- */
    cria_pilha(&tabelaSimbolos);
    cria_pilhaTipo(&tabelaTipo);
+   cria_pilhaRotulo(&tabelaRotulos);
    receivingByReference = 0;
    yyin=fp;
    yyparse();

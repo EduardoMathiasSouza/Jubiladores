@@ -26,7 +26,7 @@ typedef struct paramDesc {
 } paramDesc;
 
 typedef struct stackNode {
-	char *identificador, *label;
+	char *identificador, *rotulo;
 	tipoCategoria category;
 	int lexicalLevel, displacement, numParams;
 	tipoPascal tipo;
@@ -47,8 +47,8 @@ stackNode* getNth(pilha_simbolos *symbolsTable, int n);
 stackNode* search(pilha_simbolos *symbolsTable, char *identifier);
 void pop(pilha_simbolos *symbolsTable, int n);
 stackNode* createSimpleVarInput(char *identifier, int lexicalLevel, int displacement);
-stackNode* createSimpleFunctionInput(char *identifier, char *label, int lexicalLevel, int numParams, tipoPascal returnType);
-stackNode* createSimpleProcedureInput(char *identifier, char *label, int lexicalLevel, int numParams);
+stackNode* createSimpleFunctionInput(char *identifier, char *rotulo, int lexicalLevel, int numParams, tipoPascal returnType);
+stackNode* createSimpleProcedureInput(char *identifier, char *rotulo, int lexicalLevel, int numParams);
 stackNode* createSimpleFormalParameterInput(char *identifier, int lexicalLevel, int displacement, tipo_passado pass);
 void setTypes(pilha_simbolos *symbolsTable, tipoPascal type, int n);
 

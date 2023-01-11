@@ -67,7 +67,7 @@ stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displ
     return newNode;
 }
 
-stackNode* createSimpleFunctionInput(char *identificador, char *label, int lexicalLevel, int numParams, tipoPascal returnType){
+stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexicalLevel, int numParams, tipoPascal returnType){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
     newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
@@ -78,13 +78,13 @@ stackNode* createSimpleFunctionInput(char *identificador, char *label, int lexic
     newNode->displacement = -4-numParams;
     newNode->params = NULL;
     newNode->tipo = returnType;
-    newNode->label = (char*)malloc(strlen(label) * sizeof(char));
-    strcpy(newNode->label, label);
+    newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
+    strcpy(newNode->rotulo, rotulo);
     newNode->numParams = numParams;
 
     return newNode;
 }
-stackNode* createSimpleProcedureInput(char *identificador, char *label, int lexicalLevel, int numParams){
+stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lexicalLevel, int numParams){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
     newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
@@ -94,8 +94,8 @@ stackNode* createSimpleProcedureInput(char *identificador, char *label, int lexi
     newNode->lexicalLevel = lexicalLevel;
     newNode->numParams = numParams;
     newNode->params = NULL;
-    newNode->label = (char*)malloc(strlen(label) * sizeof(char));
-    strcpy(newNode->label, label);
+    newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
+    strcpy(newNode->rotulo, rotulo);
 
 
     return newNode;
@@ -136,7 +136,7 @@ void printTable(pilha_simbolos *symbolsTable){
         printf("Lexical Level: %d | ", aux->lexicalLevel);
         printf("Displacement: %d | ", aux->displacement);
         printf("Type: %d | ", aux->tipo);
-        printf("Label: %s | ", aux->label);
+        printf("Rotulo: %s | ", aux->rotulo);
         printf("Num Params: %d | ", aux->numParams);
         printf("Pass: %d | ", aux->pass);
         aux = aux->prox;

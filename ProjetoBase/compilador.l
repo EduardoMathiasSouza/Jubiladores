@@ -167,6 +167,59 @@ not { simbolo = simb_nao;
         return DIVISAO;
 }
 
+\= { simbolo = simb_igual;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("igual");
+        return IGUAL;
+}
+
+\<> { simbolo = simb_diferente;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("diferente");
+        return DIFERENTE;
+}
+
+\< { simbolo = simb_menor;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("menor");
+        return MENOR;
+}
+
+\<= { simbolo = simb_menor_igual;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("menor_igual");
+        return MENOR_IGUAL;
+}
+
+\>= { simbolo = simb_maior_igual;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("maior_igual");
+        return MAIOR_IGUAL;
+}
+
+\> { simbolo = simb_maior;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("maior");
+        return MAIOR;
+}
+
+while { simbolo = simb_enquanto;
+        strncpy (token, yytext, TAM_TOKEN);
+        IMPRIME("while");
+        return WHILE;
+}
+
+do { simbolo = simb_faca;
+       strncpy (token, yytext, TAM_TOKEN);
+       IMPRIME("do");
+       return DO;
+}
+
+integer { simbolo = simb_integer;
+           strncpy (token, yytext, TAM_TOKEN);
+           return INTEGER;
+}
+
 {numero} { simbolo = simb_numero;
           strncpy (token, yytext, TAM_TOKEN);
           IMPRIME(" numero  ");
