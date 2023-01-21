@@ -1,15 +1,14 @@
-program comandoWhile;
-var n, k: integer; 
-    f1, f2, f3:integer;
-begin             
-   read(n);     
-   f1:=0; f2:=1; k:=1;
-   while (k <= n) do  
-   begin              
-      f3:=f2+f1;      
-      f1:=f2;         
-      f2:=f3;         
-      k:=k+1          
-   end;                 
-   write(n,k)         
-   end. 
+program cmdIf (input, output);
+var i, j: integer;       
+begin                   
+   read(j);                 
+   i:=0;                   
+   while (i < j) do        
+   begin                   
+      if (i div 2 * 2 = i)  
+        then   write(i,0)  
+        else   write(i,1); 
+      i := i+1                    
+   end;                    
+end. 
+

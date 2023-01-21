@@ -16,6 +16,7 @@ int procs;
 int receivingByReference;
 int newParams;
 int num_vars, novas_var, nivel_lexico, deslocamento;
+unsigned int temElse, it_temElse;
 int RotId = 0;
 int lexicalLevel = 0;
 char comparacao[100];
@@ -23,6 +24,31 @@ pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
 pilhaRotulo tabelaRotulos;
+
+
+void setTemElse() {
+	temElse = temElse | (1 << it_temElse);
+}
+
+int getTemElse() {
+	int r = temElse & (1 << it_temElse);
+	temElse = temElse & ~(1 << it_temElse); 
+	temElse--;
+	if (!it_temElse)
+		temElse = 0;
+	return r;
+}
+
+void initTemElse() {
+	if (!(temElse & (unsigned int)1)) {
+		temElse = 1;
+		it_temElse = 0;
+	}
+	it_temElse++;
+}
+
+
+
 
 %}
 
@@ -32,7 +58,7 @@ pilhaRotulo tabelaRotulos;
 %token INTEGER
 %token WHILE DO IF THEN ELSE 
 %token MAIOR MENOR MAIOR_IGUAL MENOR_IGUAL IGUAL DIFERENTE
-%token SOMA SUBTRACAO MULTIPLICACAO DIVISAO
+%token SOMA SUBTRACAO MULTIPLICACAO DIVISAO DIV
 %token NUMERO READ WRITE
 %token OR AND NOT
 
@@ -169,8 +195,60 @@ desvio:
 ;
 
 comando_condicional:
-{}
+	if_then cond_else
+	{
+		if (!getTemElse()) {
+			char rot[100];
+			sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+			geraCodigo(NULL, rot); 
+		}
+		char rot[100];
+		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(NULL, rot); 
+		pop_pilhaRotulo(& tabelaRotulos, 2);
+	}
 ;
+
+if_then: 
+	IF expressao 
+	{  
+		initTemElse(); //inicializa se necessario, incrementa o iterador
+		// Gera rotulos de entrada e saida do IF
+		char *RotIfInicio = geraRotulo(RotId);
+		RotId++;
+		char *RotIfFim = geraRotulo(RotId);
+		RotId++;
+
+		push_pilhaRotulo(&tabelaRotulos, RotIfInicio);
+		push_pilhaRotulo(&tabelaRotulos, RotIfFim);
+			
+		// Imprime rotulo de entrada no inicio do if
+		char rot[100];
+		sprintf(rot, "DSVF %s", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(NULL, rot);
+	} THEN comando_sem_rotulo
+;
+
+cond_else:
+	ELSE
+	{
+		setTemElse(); //marca pro iterador que a iésima cláusula tem else
+		// Imprime rotulo de entrada no inicio do if
+		char rot[100];
+		sprintf(rot, "DSVS %s", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(NULL, rot);
+
+		// Imprime rotulo de entrada no fim do if
+		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(NULL, rot);
+	}
+	else_multiplo_unico
+;
+
+else_multiplo_unico:
+	comando_sem_rotulo
+;
+
 
 
 chama_procedimento:
@@ -275,6 +353,9 @@ lista_fator:
 		geraCodigo(NULL, "MULT");}
 	| DIVISAO fator { 
 		verifica_tipo(&tabelaTipo, "divisao");
+		geraCodigo(NULL, "DIVI"); }
+	| DIV fator { 
+		verifica_tipo(&tabelaTipo, "div");
 		geraCodigo(NULL, "DIVI"); }
 	| AND fator { 
 		verifica_tipo(&tabelaTipo, "and"); 

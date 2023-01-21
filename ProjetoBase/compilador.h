@@ -21,7 +21,7 @@ typedef enum simbolos {
   simb_rotulo, simb_procedimento, simb_funcao, 
   simb_goto, simb_se, simb_entao, simb_senao, simb_enquanto, simb_faca,simb_igual,
   simb_diferente, simb_menor, simb_menor_igual, simb_maior_igual, simb_maior,
-  simb_mais, simb_menos, simb_vezes, simb_divisao, simb_e, simb_ou, simb_nao,
+  simb_mais, simb_menos, simb_vezes, simb_divisao, simb_div, simb_e, simb_ou, simb_nao,
   simb_abre_colchetes, simb_fecha_colchetes, simb_integer, simb_read, simb_write
 } simbolos;
 
