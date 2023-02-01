@@ -28,7 +28,7 @@ typedef struct paramDesc {
 typedef struct stackNode {
 	char *identificador, *rotulo;
 	tipoCategoria category;
-	int lexicalLevel, displacement, numParams;
+	int nivel_lexico, deslocamento, numParams;
 	tipoPascal tipo;
 	tipo_passado pass;
 	paramDesc *params;

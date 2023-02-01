@@ -60,8 +60,8 @@ stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displ
     strcpy(newNode->identificador, identificador);
     
     newNode->category = Variavel_simples;
-    newNode->lexicalLevel = lexicalLevel;
-    newNode->displacement = displacement;
+    newNode->nivel_lexico = lexicalLevel;
+    newNode->deslocamento = displacement;
     newNode->tipo = naosei;
 
     return newNode;
@@ -74,8 +74,8 @@ stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexi
     strcpy(newNode->identificador, identificador);
     
     newNode->category = funcao;
-    newNode->lexicalLevel = lexicalLevel;
-    newNode->displacement = -4-numParams;
+    newNode->nivel_lexico = lexicalLevel;
+    newNode->deslocamento = -4-numParams;
     newNode->params = NULL;
     newNode->tipo = returnType;
     newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
@@ -91,7 +91,7 @@ stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lex
     strcpy(newNode->identificador, identificador);
     
     newNode->category = procedimento;
-    newNode->lexicalLevel = lexicalLevel;
+    newNode->nivel_lexico = lexicalLevel;
     newNode->numParams = numParams;
     newNode->params = NULL;
     newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
@@ -107,8 +107,8 @@ stackNode* createSimpleFormalParameterInput(char *identificador, int lexicalLeve
     strcpy(newNode->identificador, identificador);
     
     newNode->category = Parametro_formal;
-    newNode->lexicalLevel = lexicalLevel;
-    newNode->displacement = displacement;
+    newNode->nivel_lexico = lexicalLevel;
+    newNode->deslocamento = displacement;
     newNode->tipo = naosei;
     newNode->pass = pass;
 
@@ -133,8 +133,8 @@ void printTable(pilha_simbolos *symbolsTable){
     while(aux != NULL){
         printf("identificador: %s | ", aux->identificador);
         printf("Category: %d | ", aux->category);
-        printf("Lexical Level: %d | ", aux->lexicalLevel);
-        printf("Displacement: %d | ", aux->displacement);
+        printf("Lexical Level: %d | ", aux->nivel_lexico);
+        printf("Displacement: %d | ", aux->deslocamento);
         printf("Type: %d | ", aux->tipo);
         printf("Rotulo: %s | ", aux->rotulo);
         printf("Num Params: %d | ", aux->numParams);
@@ -153,7 +153,7 @@ void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount
 		strcpy(p->params[i].identificador, aux->identificador);
 		p->params[i].tipo = aux->tipo;
 		p->params[i].pass = aux->pass;
-		aux->displacement = -4-i;
+		aux->deslocamento = -4-i;
 		aux = aux->prox;
 	}
 	aux->numParams = parameterCount;

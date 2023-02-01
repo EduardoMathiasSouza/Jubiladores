@@ -239,8 +239,15 @@ do { simbolo = simb_faca;
        return DO;
 }
 
+procedure { simbolo = simb_procedimento;
+            strncpy (token, yytext, TAM_TOKEN);
+            IMPRIME("procedure");
+            return PROCEDURE;
+}
+
 integer { simbolo = simb_integer;
            strncpy (token, yytext, TAM_TOKEN);
+           IMPRIME("integer");
            return INTEGER;
 }
 

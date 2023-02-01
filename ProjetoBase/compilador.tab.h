@@ -84,7 +84,7 @@ extern int yydebug;
     OR = 290,
     AND = 291,
     NOT = 292,
-    NADA = 293
+    PROCEDURE = 293
   };
 #endif
 
