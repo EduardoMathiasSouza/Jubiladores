@@ -103,9 +103,9 @@ bloco       :
 			  parte_declara_sub_rotinas
 			  {
 				if(proc_declarados > 0 && nivel_lexico == 0) {
-					char command[100];
-					sprintf(command, "%s: NADA", RotFimSubrotina);
-					geraCodigo(NULL, command); 
+					//char command[100];
+					//sprintf(command, "%s: NADA", RotFimSubrotina);
+					geraCodigo(RotFimSubrotina, "NADA"); 
 					}
 				}
               comando_composto
@@ -200,8 +200,8 @@ declaracao_procedimento:
 		// Imprime rotulo de entrada da subrotina
 		char rotentrada[100];
 		nivel_lexico++;
-		sprintf(rotentrada, "%s: ENPR %d", getRotulo(&tabelaRotulos,1), nivel_lexico);
-		geraCodigo(NULL, rotentrada); 
+		sprintf(rotentrada, "ENPR %d", nivel_lexico);
+		geraCodigo(getRotulo(&tabelaRotulos, 1), rotentrada); 
 	
 		novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, nivel_lexico, 0);
 		push(&tabelaSimbolos, novaEntrada);
@@ -229,7 +229,7 @@ declaracao_procedimento:
 			exit(1);
 		}
 		char command[100];
-		sprintf(command, "RTPR %d,%d", variavelDestino->nivel_lexico, variavelDestino->numParams);
+		sprintf(command, "RTPR %d, %d", variavelDestino->nivel_lexico, variavelDestino->numParams);
 		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
 
 		novos_param = 0;
@@ -310,12 +310,12 @@ comando_condicional:
 	{
 		if (!getTemElse()) {
 			char rot[100];
-			sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
-			geraCodigo(NULL, rot); 
+			//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+			geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA"); 
 		}
 		char rot[100];
-		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
-		geraCodigo(NULL, rot); 
+		//sprintf(rot, "NADA", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
 		pop_pilhaRotulo(& tabelaRotulos, 2);
 	}
 ;
@@ -350,8 +350,8 @@ cond_else:
 		geraCodigo(NULL, rot);
 
 		// Imprime rotulo de entrada no fim do if
-		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
-		geraCodigo(NULL, rot);
+		//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
 	}
 	else_multiplo_unico
 ;
@@ -412,8 +412,8 @@ comando_repetitivo:
 		push_pilhaRotulo(&tabelaRotulos, RotWhileFim);
 
 		char rot[100];
-        sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
-		geraCodigo(NULL,rot); 
+    //sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
+		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
 	}
 	expressao DO
 	{
@@ -428,8 +428,8 @@ comando_repetitivo:
 		geraCodigo(NULL, dsvs);
 
 		char rot[100];
-		sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
-		geraCodigo(NULL, rot);
+		//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
 
 		pop_pilhaRotulo(&tabelaRotulos, 2);
 	}
@@ -513,12 +513,12 @@ fator:
 		if(variavel_carregada != NULL) {
 			if(variavel_carregada->category == funcao) {
 				char chamaProcedure[100];
-				sprintf(chamaProcedure, "CHPR %s,%d", variavel_carregada->rotulo, nivel_lexico);
+				sprintf(chamaProcedure, "CHPR %s, %d", variavel_carregada->rotulo, nivel_lexico);
 				geraCodigo(NULL, chamaProcedure);
 			}
 			else {
 				char comando[100];
-				sprintf(comando, "CRVL %d,%d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
+				sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				variavel_carregada = NULL;
 				geraCodigo(NULL, comando);
 			}
@@ -531,7 +531,7 @@ fator:
 			}
 			else {
 				char comando[100];
-				sprintf(comando, "CRVL %d,%d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+				sprintf(comando, "CRVL %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 				variavelDestino = NULL;
 				geraCodigo(NULL, comando);
 			}
@@ -571,7 +571,7 @@ atribuicao:
 	{
 		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
-		sprintf(varLexDisp, "ARMZ %d,%d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+		sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		geraCodigo(NULL, varLexDisp); 
 		variavelDestino = NULL;
 	}
@@ -633,7 +633,7 @@ simbolo_leitura:
 
 		// Armazena na variavel destino
       char varLexDisp[1000];
-		sprintf(varLexDisp, "ARMZ %d,%d ", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+		sprintf(varLexDisp, "ARMZ %d, %d ", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		geraCodigo(NULL, varLexDisp); 
 		variavelDestino = NULL;
 	}
