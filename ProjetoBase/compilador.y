@@ -268,7 +268,7 @@ secao_parametros_formais:
 ;
 
 var_vazio:
-	VAR {receivingByReference = 1; } | comando_vazio
+	VAR {receivingByReference = 1; } | comando_vazio {receivingByReference = 0; }
 ;
 
 comando_composto: 
@@ -367,7 +367,7 @@ chama_procedimento:
 		entra_procedimento = 1;
 		// Imprime rotulo de entrada da subrotina
 		procedimentoAtual = variavelDestino;
-		sprintf(chama_proc, "CHPR %s", variavelDestino->rotulo, nivel_lexico);
+		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
 		geraCodigo(NULL, chama_proc);
    	}
 	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
@@ -385,7 +385,7 @@ chama_procedimento:
 		procedimentoAtual = variavelDestino;
 		// Imprime rotulo de entrada da subrotina
 		char chama_proc[100];
-		sprintf(chama_proc, "CHPR %s", variavelDestino->rotulo, nivel_lexico);
+		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
 		geraCodigo(NULL, chama_proc);
 		variavelDestino = NULL;
 	}
