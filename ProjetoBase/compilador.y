@@ -527,9 +527,9 @@ fator:
 				
 				int pass = entra_procedimento == 0 ? variavel_carregada->pass :
 																				 procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass;
-				if (pass == valor)
+				if (pass == valor || (pass == referencia && entra_procedimento == 1 && variavel_carregada->pass == referencia))
 					sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
-				else if (entra_procedimento == 1 && procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass == referencia)
+				else if (entra_procedimento == 1 && pass == referencia)
           sprintf(comando, "CREN %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				else
 					sprintf(comando, "CRVI %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
@@ -547,7 +547,7 @@ fator:
 				char comando[100];
 				int pass = entra_procedimento == 0 ? variavelDestino->pass :
 									procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass;
-				if (variavelDestino->pass == valor)
+				if (pass == valor || (pass == referencia && entra_procedimento == 1 && variavelDestino->pass == referencia))
 					sprintf(comando, "CRVL %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 				else if (entra_procedimento == 1 && pass == referencia)
 					sprintf(comando, "CREN %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);

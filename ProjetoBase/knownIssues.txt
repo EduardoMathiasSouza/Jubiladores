@@ -2,10 +2,12 @@
 SOLVED: lexical level - constantly going up, should reflect the actual depth (3)
 SOLVED: parameters - doesn't count the number of parameters required
 SOLVED: parameters not updated on params list on declaration (1)
-				subsequent pass by reference should be by value (2)
+SOLVED: subsequent pass by reference should be by value (2)
+				functions not implemented
 
-possible issue:
+possible issues:
 - label mismatch
+- "desvio" empty
 
 
 
