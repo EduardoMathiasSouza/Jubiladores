@@ -373,7 +373,7 @@ chama_procedimento:
 		entra_procedimento = 1;
 		//geraCodigo(NULL, chama_proc);
    	}
-	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; printf("%p", procedimentoAtual); }
+	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
 	lista_expressoes_ou_vazio
 	FECHA_PARENTESES
 	{
