@@ -43,5 +43,6 @@ extern int nl;
  * ------------------------------------------------------------------- */
 
 void geraCodigo (char*, char*);
+int imprimeErro(char*);
 int yylex();
 void yyerror(const char *s);

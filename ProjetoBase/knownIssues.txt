@@ -1,5 +1,6 @@
-num_vars/old_vars - change to a stack
-lexical level - constantly going up, should reflect the actual depth
+				num_vars/old_vars - change to a stack
+				lexical level - constantly going up, should reflect the actual depth
+SOLVED: parameters - doesn't count the number of parameters required
 
 possible issue:
 - label mismatch

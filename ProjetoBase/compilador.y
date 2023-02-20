@@ -27,7 +27,7 @@ pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
 pilhaRotulo tabelaRotulos;
-
+int num_params_chamada;
 
 void setTemElse() {
 	temElse = temElse | (1 << it_temElse);
@@ -374,7 +374,9 @@ chama_procedimento:
 	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
 	lista_expressoes_ou_vazio
 	FECHA_PARENTESES
-	{ 
+	{
+		if (novos_param != procedimentoAtual->numParams)
+			imprimeErro("Número de parâmetros errado.\n"); 
 		entra_procedimento = 0;
 		geraCodigo(NULL, chama_proc); 
 		receivingFormalParams = 0;
@@ -519,7 +521,10 @@ fator:
 			}
 			else {
 				char comando[100];
-				sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
+				if (variavel_carregada->pass == valor)
+					sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
+				else
+					sprintf(comando, "CRVI %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				variavel_carregada = NULL;
 				geraCodigo(NULL, comando);
 			}
@@ -532,7 +537,10 @@ fator:
 			}
 			else {
 				char comando[100];
-				sprintf(comando, "CRVL %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+				if (variavelDestino->pass == valor)
+					sprintf(comando, "CRVL %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+				else
+					sprintf(comando, "CRVI %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 				variavelDestino = NULL;
 				geraCodigo(NULL, comando);
 			}
@@ -633,7 +641,7 @@ simbolo_leitura:
 		}
 
 		// Armazena na variavel destino
-      char varLexDisp[1000];
+    char varLexDisp[1000];
 		sprintf(varLexDisp, "ARMZ %d, %d ", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		geraCodigo(NULL, varLexDisp); 
 		variavelDestino = NULL;
