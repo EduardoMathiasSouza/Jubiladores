@@ -369,7 +369,7 @@ chama_procedimento:
 		// Imprime rotulo de entrada da subrotina
 		procedimentoAtual = variavelDestino;
 		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
-		geraCodigo(NULL, chama_proc);
+		//geraCodigo(NULL, chama_proc);
    	}
 	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
 	lista_expressoes_ou_vazio
