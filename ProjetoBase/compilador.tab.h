@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.7.5.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,9 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Undocumented macros, especially those whose name start with YY_,
-   are private implementation details.  Do not rely on them.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
 
 #ifndef YY_YY_COMPILADOR_TAB_H_INCLUDED
 # define YY_YY_COMPILADOR_TAB_H_INCLUDED
@@ -44,49 +45,54 @@
 extern int yydebug;
 #endif
 
-/* Token type.  */
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
   enum yytokentype
   {
-    PROGRAM = 258,
-    ABRE_PARENTESES = 259,
-    FECHA_PARENTESES = 260,
-    VIRGULA = 261,
-    PONTO_E_VIRGULA = 262,
-    DOIS_PONTOS = 263,
-    PONTO = 264,
-    T_BEGIN = 265,
-    T_END = 266,
-    VAR = 267,
-    IDENT = 268,
-    ATRIBUICAO = 269,
-    INTEGER = 270,
-    WHILE = 271,
-    DO = 272,
-    IF = 273,
-    THEN = 274,
-    ELSE = 275,
-    MAIOR = 276,
-    MENOR = 277,
-    MAIOR_IGUAL = 278,
-    MENOR_IGUAL = 279,
-    IGUAL = 280,
-    DIFERENTE = 281,
-    SOMA = 282,
-    SUBTRACAO = 283,
-    MULTIPLICACAO = 284,
-    DIVISAO = 285,
-    DIV = 286,
-    NUMERO = 287,
-    READ = 288,
-    WRITE = 289,
-    OR = 290,
-    AND = 291,
-    NOT = 292,
-    PROCEDURE = 293,
-    FUNCTION = 294
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    PROGRAM = 258,                 /* PROGRAM  */
+    ABRE_PARENTESES = 259,         /* ABRE_PARENTESES  */
+    FECHA_PARENTESES = 260,        /* FECHA_PARENTESES  */
+    VIRGULA = 261,                 /* VIRGULA  */
+    PONTO_E_VIRGULA = 262,         /* PONTO_E_VIRGULA  */
+    DOIS_PONTOS = 263,             /* DOIS_PONTOS  */
+    PONTO = 264,                   /* PONTO  */
+    T_BEGIN = 265,                 /* T_BEGIN  */
+    T_END = 266,                   /* T_END  */
+    VAR = 267,                     /* VAR  */
+    IDENT = 268,                   /* IDENT  */
+    ATRIBUICAO = 269,              /* ATRIBUICAO  */
+    INTEGER = 270,                 /* INTEGER  */
+    WHILE = 271,                   /* WHILE  */
+    DO = 272,                      /* DO  */
+    IF = 273,                      /* IF  */
+    THEN = 274,                    /* THEN  */
+    ELSE = 275,                    /* ELSE  */
+    MAIOR = 276,                   /* MAIOR  */
+    MENOR = 277,                   /* MENOR  */
+    MAIOR_IGUAL = 278,             /* MAIOR_IGUAL  */
+    MENOR_IGUAL = 279,             /* MENOR_IGUAL  */
+    IGUAL = 280,                   /* IGUAL  */
+    DIFERENTE = 281,               /* DIFERENTE  */
+    SOMA = 282,                    /* SOMA  */
+    SUBTRACAO = 283,               /* SUBTRACAO  */
+    MULTIPLICACAO = 284,           /* MULTIPLICACAO  */
+    DIVISAO = 285,                 /* DIVISAO  */
+    DIV = 286,                     /* DIV  */
+    NUMERO = 287,                  /* NUMERO  */
+    READ = 288,                    /* READ  */
+    WRITE = 289,                   /* WRITE  */
+    OR = 290,                      /* OR  */
+    AND = 291,                     /* AND  */
+    NOT = 292,                     /* NOT  */
+    PROCEDURE = 293,               /* PROCEDURE  */
+    FUNCTION = 294                 /* FUNCTION  */
   };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
 
 /* Value type.  */

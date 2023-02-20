@@ -56,7 +56,7 @@ void pop(pilha_simbolos *symbolsTable, int n){
 stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displacement){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
-    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    newNode->identificador = (char*)malloc((strlen(identificador)+1) * sizeof(char));
     strcpy(newNode->identificador, identificador);
     
     newNode->category = Variavel_simples;
@@ -70,7 +70,7 @@ stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displ
 stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexicalLevel, int numParams, tipoPascal returnType){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
-    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    newNode->identificador = (char*)malloc((strlen(identificador)+1) * sizeof(char));
     strcpy(newNode->identificador, identificador);
     
     newNode->category = funcao;
@@ -87,7 +87,7 @@ stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexi
 stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lexicalLevel, int numParams){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
-    newNode->identificador = (char*)malloc(strlen(identificador) * sizeof(char));
+    newNode->identificador = (char*)malloc((strlen(identificador)+1) * sizeof(char));
     strcpy(newNode->identificador, identificador);
     
     newNode->category = procedimento;
