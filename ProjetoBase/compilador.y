@@ -223,17 +223,18 @@ declaracao_procedimento:
 		geraCodigo(NULL, dmem);
 		
 		// Pega procedimento para printar infos da saida dele
-		variavelDestino = getNth(&tabelaSimbolos, num_params + 1);
+		variavelDestino = getNth(&tabelaSimbolos, num_params);
 		if(variavelDestino == NULL) {
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
 		}
 		char command[100];
 		sprintf(command, "RTPR %d, %d", variavelDestino->nivel_lexico, variavelDestino->numParams);
+		geraCodigo(NULL, command);
 		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
 
 		novos_param = 0;
-		geraCodigo(NULL, command);
+		//geraCodigo(NULL, command);
 		nivel_lexico--;
 
 		variavelDestino = NULL; // Libera variavel destino
