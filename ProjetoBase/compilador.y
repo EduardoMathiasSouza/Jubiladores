@@ -125,6 +125,7 @@ parte_declara_sub_rotinas:
 
 opcoes_sub_rotinas:
 	declaracao_procedimento PONTO_E_VIRGULA
+	| declaracao_funcao PONTO_E_VIRGULA
 	| comando_vazio
 ;
 
@@ -242,6 +243,14 @@ declaracao_procedimento:
 		EhSubrotina = 0;
 		pop_pilhaRotulo(&tabelaRotulos, 2);
 	}
+;
+
+declaracao_funcao: 
+	FUNCTION IDENT
+	parametros_formais_vazio
+	DOIS_PONTOS tipo PONTO_E_VIRGULA
+	bloco
+
 ;
 
 parametros_formais_vazio:
