@@ -1,6 +1,13 @@
 				num_vars/old_vars - change to a stack
 				lexical level - constantly going up, should reflect the actual depth
 SOLVED: parameters - doesn't count the number of parameters required
+SOLVED: parameters not updated on params list on declaration (1)
+				subsequent pass by reference should be by value (2)
 
 possible issue:
 - label mismatch
+
+
+
+(1) - the code was updating some random variable instead of the procedure.
+(2) - in case of: p(var x: integer); p(x) call inside p -> should be passed by value.

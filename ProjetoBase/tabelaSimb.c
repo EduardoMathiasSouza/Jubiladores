@@ -149,7 +149,7 @@ void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount
 	p->params = (paramDesc*)malloc(parameterCount * sizeof(paramDesc));
 	stackNode *aux = symbolsTable->topo;
 	for (int i = 0; i < parameterCount; i++) {
-		p->params[i].identificador = (char*)malloc(strlen(aux->identificador)*sizeof(char));
+		p->params[i].identificador = (char*)malloc((strlen(aux->identificador)+1)*sizeof(char));
 		strcpy(p->params[i].identificador, aux->identificador);
 		p->params[i].tipo = aux->tipo;
 		p->params[i].pass = aux->pass;

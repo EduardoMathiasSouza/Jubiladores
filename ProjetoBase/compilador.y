@@ -27,7 +27,7 @@ pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
 pilhaRotulo tabelaRotulos;
-int num_params_chamada;
+int num_params_chamada, not_simple;
 
 void setTemElse() {
 	temElse = temElse | (1 << it_temElse);
@@ -254,8 +254,9 @@ ABRE_PARENTESES { num_params = 0; }
 	lista_parametros_formais
 	FECHA_PARENTESES
 	{
-		updateParams(getNth(&tabelaSimbolos, num_params + 1),
+		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
+		//printf("%s\n", );
 	}
 ;
 
@@ -369,9 +370,10 @@ chama_procedimento:
 		// Imprime rotulo de entrada da subrotina
 		procedimentoAtual = variavelDestino;
 		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
+		entra_procedimento = 1;
 		//geraCodigo(NULL, chama_proc);
    	}
-	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
+	ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; printf("%p", procedimentoAtual); }
 	lista_expressoes_ou_vazio
 	FECHA_PARENTESES
 	{
@@ -449,7 +451,8 @@ expressao:
 
 relacao_exp_simples_ou_vazio:
 	relacao expressao_simples
-	{ 
+	{
+		not_simple = 1; 
 		verifica_tipo(&tabelaTipo, "relacional");
 		geraCodigo(NULL, comparacao);
 	}
@@ -521,8 +524,13 @@ fator:
 			}
 			else {
 				char comando[100];
-				if (variavel_carregada->pass == valor)
+				
+				int pass = entra_procedimento == 0 ? variavel_carregada->pass :
+																				 procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass;
+				if (pass == valor)
 					sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
+				else if (entra_procedimento == 1 && procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass == referencia)
+          sprintf(comando, "CREN %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				else
 					sprintf(comando, "CRVI %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				variavel_carregada = NULL;
@@ -537,8 +545,12 @@ fator:
 			}
 			else {
 				char comando[100];
+				int pass = entra_procedimento == 0 ? variavelDestino->pass :
+									procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass;
 				if (variavelDestino->pass == valor)
 					sprintf(comando, "CRVL %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+				else if (entra_procedimento == 1 && pass == referencia)
+					sprintf(comando, "CREN %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 				else
 					sprintf(comando, "CRVI %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 				variavelDestino = NULL;
@@ -580,7 +592,10 @@ atribuicao:
 	{
 		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
-		sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+		if (variavelDestino->pass == valor)
+			sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
+		else
+			sprintf(varLexDisp, "ARMI %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		geraCodigo(NULL, varLexDisp); 
 		variavelDestino = NULL;
 	}
