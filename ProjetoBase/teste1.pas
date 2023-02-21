@@ -1,7 +1,15 @@
 program proc1 (input, output); 
   var x, y: integer;      
   procedure p;             
-     var z:integer;              
+     var z:integer;        
+     procedure q;
+       var a: integer;
+			 procedure r;
+					var b: integer;
+					begin
+					end;
+       begin
+       end;      
      begin                   
        z:=x;                   
        x:=x-1;           

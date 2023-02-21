@@ -1,9 +1,10 @@
-				num_vars/old_vars - change to a stack
+				num_vars/old_vars - change to a stack (4)
 SOLVED: lexical level - constantly going up, should reflect the actual depth (3)
 SOLVED: parameters - doesn't count the number of parameters required
 SOLVED: parameters not updated on params list on declaration (1)
 SOLVED: subsequent pass by reference should be by value (2)
 				functions not implemented
+SOLVED:	breaking with nested proc declarations
 
 possible issues:
 - label mismatch
@@ -14,3 +15,4 @@ possible issues:
 (1) - the code was updating some random variable instead of the procedure.
 (2) - in case of: p(var x: integer); p(x) call inside p -> should be passed by value.
 (3) - not an actual issue
+(4) - somehow not an actual issue???

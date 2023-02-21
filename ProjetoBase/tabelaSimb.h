@@ -52,6 +52,9 @@ stackNode* createSimpleProcedureInput(char *identifier, char *rotulo, int lexica
 stackNode* createSimpleFormalParameterInput(char *identifier, int lexicalLevel, int displacement, tipo_passado pass);
 void setTypes(pilha_simbolos *symbolsTable, tipoPascal type, int n);
 
+int lastLexicalLevel(pilha_simbolos *symbolsTable);
+int hasNext(pilha_simbolos *symbolsTable, const char * ident);
+
 void printTable(pilha_simbolos *symbolsTable);
 
 void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount);

@@ -128,6 +128,26 @@ void setTypes(pilha_simbolos *symbolsTable, tipoPascal tipo, int n){
     }
 }
 
+int lastLexicalLevel(pilha_simbolos * symbolsTable) {
+		stackNode * aux = symbolsTable->topo;
+		while (aux != NULL) {
+				if (aux->category == procedimento || aux->category == funcao)
+						return aux->nivel_lexico;
+				aux = aux->prox;
+		}
+		return -1;
+}
+
+int hasNext(pilha_simbolos * symbolsTable, const char * ident) {
+    stackNode * aux = symbolsTable->topo;
+		while (aux != NULL && strcmp(ident, aux->identificador) != 0) {
+				if (aux->category == procedimento || aux->category == funcao)
+						return 1;
+				aux = aux->prox;
+		}
+		return 0;
+}
+
 void printTable(pilha_simbolos *symbolsTable){
     stackNode *aux = symbolsTable->topo;
     while(aux != NULL){
