@@ -4,10 +4,6 @@ program proc1 (input, output);
      var z:integer;        
      procedure q;
        var a: integer;
-			 procedure r;
-					var b: integer;
-					begin
-					end;
        begin
        end;      
      begin                   

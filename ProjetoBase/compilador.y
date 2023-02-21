@@ -20,7 +20,7 @@ unsigned int temElse, it_temElse;
 int entra_procedimento;
 char chama_proc[100];
 char *RotFimSubrotina;
-int RotId = 0;
+int RotId = 1;
 int EhSubrotina = 0;
 char comparacao[100];
 pilha_simbolos tabelaSimbolos;
@@ -100,14 +100,22 @@ tipo:
 
 
 bloco       :
-        parte_declara_vars
+        parte_declara_vars {declara_proc_func = 0;}
 			  parte_declara_sub_rotinas
 			  {
 				if(proc_declarados > 0 && nivel_lexico == 0) {
 					//char command[100];
 					//sprintf(command, "%s: NADA", RotFimSubrotina);
 					geraCodigo("R00", "NADA"); 
+				} else if (declara_proc_func == 1) {
+					char rotsaida[100];
+      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,2));
+      		geraCodigo(rotsaida, "NADA");
+
+
 				}
+				declara_proc_func = 0;
+
 				}
               comando_composto
 ;
@@ -120,7 +128,7 @@ parte_declara_vars:  var {
 ;
 
 parte_declara_sub_rotinas:
-	parte_declara_sub_rotinas opcoes_sub_rotinas
+	parte_declara_sub_rotinas opcoes_sub_rotinas {declara_proc_func = 1;}
 	| comando_vazio
 ;
 
@@ -184,9 +192,9 @@ declaracao_procedimento:
 	{
 		proc_declarados++;
 		// Gera rotulos de entrada e saida
-		RotFimSubrotina = geraRotulo(RotId);
-		RotId++;
 		char *RotInicioSubrotina = geraRotulo(RotId);
+		RotId++;
+		RotFimSubrotina = geraRotulo(RotId);
 		RotId++;
 		push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
 		push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
@@ -195,14 +203,15 @@ declaracao_procedimento:
 		// Soh imprime no primeiro pois desvia pra main
 		if(proc_declarados == 1) {
 			// Imprime rotulo de saida da subrotina
-			char rotsaida[100];
-			sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,2));
-			geraCodigo(NULL, rotsaida);
+			//char rotsaida[100];
+			//sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,2));
+			geraCodigo(NULL, "DSVS R00");
 		} else if (lastLexicalLevel(&tabelaSimbolos) == nivel_lexico - 1) {
-			char rotsaida[100];
-			sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,2));
-			geraCodigo(NULL, rotsaida);
-		}
+      // Imprime rotulo de saida da subrotina
+      char rotsaida[100];
+      sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,4));
+      geraCodigo(NULL, rotsaida);
+    } 
 
 		// Imprime rotulo de entrada da subrotina
 		char rotentrada[100];
@@ -239,13 +248,12 @@ declaracao_procedimento:
 		sprintf(command, "RTPR %d, %d", nivel_lexico, variavelDestino->numParams);
 		geraCodigo(NULL, command);
 
-    stackNode * cur = getNth(&tabelaSimbolos, num_vars+1);
+    /*stackNode * cur = getNth(&tabelaSimbolos, num_vars+1);
     if (hasNext(&tabelaSimbolos, cur->identificador) && nivel_lexico != 1) {
-      printf("\nSSS=%s\n", cur->identificador);
       char rotsaida[100];
       sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,2));
       geraCodigo(rotsaida, "NADA");
-    }
+    }*/
 
 
 		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
@@ -395,6 +403,7 @@ else_multiplo_unico:
 chama_procedimento:
     {
 		entra_procedimento = 1;
+		declara_proc_func = 0;
 		// Imprime rotulo de entrada da subrotina
 		procedimentoAtual = variavelDestino;
 		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
@@ -461,8 +470,8 @@ comando_repetitivo:
 		geraCodigo(NULL, dsvs);
 
 		char rot[100];
-		//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
-		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
+		sprintf(rot, "%s", getRotulo(&tabelaRotulos, 1));
+		geraCodigo(rot, "NADA");
 
 		pop_pilhaRotulo(&tabelaRotulos, 2);
 	}
