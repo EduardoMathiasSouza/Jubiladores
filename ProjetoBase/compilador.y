@@ -114,9 +114,9 @@ bloco       :
 				char rotsaida[100];
      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,0));
      		geraCodigo(rotsaida, "NADA");
-
+				updateNumProcs(procedimentoAtual, declara_proc_func);
 				}
-              comando_composto
+        comando_composto
 ;
 
 parte_declara_vars:  var {
@@ -127,13 +127,13 @@ parte_declara_vars:  var {
 ;
 
 parte_declara_sub_rotinas:
-	parte_declara_sub_rotinas opcoes_sub_rotinas {declara_proc_func = 1;}
+	parte_declara_sub_rotinas {declara_proc_func=0;} opcoes_sub_rotinas
 	| comando_vazio
 ;
 
 opcoes_sub_rotinas:
-	declaracao_procedimento PONTO_E_VIRGULA
-	| declaracao_funcao PONTO_E_VIRGULA
+	declaracao_procedimento {declara_proc_func++;} PONTO_E_VIRGULA
+	| declaracao_funcao {declara_proc_func++;} PONTO_E_VIRGULA
 	| comando_vazio
 ;
 
@@ -207,6 +207,7 @@ declaracao_procedimento:
 	
 		novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, nivel_lexico, 0);
 		push(&tabelaSimbolos, novaEntrada);
+		procedimentoAtual = novaEntrada;
 	}
 	{ novos_param = 0; } parametros_formais_vazio PONTO_E_VIRGULA
 	{
@@ -218,25 +219,27 @@ declaracao_procedimento:
 	}
 	bloco
 	{
-
+		
+		pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
+		
 		// DMEM nas variaveis do procedimento
 		pop(&tabelaSimbolos, num_vars);
 		char dmem[100];
 		sprintf(dmem, "DMEM %d", num_vars);
 		geraCodigo(NULL, dmem);
+		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
 		
 		// Pega procedimento para printar infos da saida dele
-		variavelDestino = getNth(&tabelaSimbolos, num_params);
+		variavelDestino = getTop(&tabelaSimbolos);
+		printTable(&tabelaSimbolos);
 		if(variavelDestino == NULL) {
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
 		}
 		printf("\n\n%s\n\n", variavelDestino->identificador);
 		char command[100];
-		sprintf(command, "RTPR %d, %d", nivel_lexico, variavelDestino->numParams);
+		sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
 		geraCodigo(NULL, command);
-
-		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
 
 		novos_param = 0;
 		//geraCodigo(NULL, command);
@@ -299,7 +302,7 @@ declaracao_funcao:
       exit(1);
     }
     char command[100];
-    sprintf(command, "RTPR %d, %d", nivel_lexico, variavelDestino->numParams);
+    sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
     geraCodigo(NULL, command);
 
  	  pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
@@ -327,7 +330,6 @@ ABRE_PARENTESES { num_params = 0; }
 	{
 		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
-		//printf("%s\n", );
 	}
 ;
 
@@ -384,11 +386,9 @@ comando_condicional:
 	{
 		if (!getTemElse()) {
 			char rot[100];
-			//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
 			geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA"); 
 		}
 		char rot[100];
-		//sprintf(rot, "NADA", getRotulo(&tabelaRotulos, 2));
 		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
 		pop_pilhaRotulo(& tabelaRotulos, 2);
 	}
@@ -425,7 +425,6 @@ cond_else:
 		geraCodigo(NULL, rot);
 
 		// Imprime rotulo de entrada no fim do if
-		//sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 1));
 		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
 	}
 	else_multiplo_unico
@@ -524,7 +523,6 @@ comando_repetitivo:
 		push_pilhaRotulo(&tabelaRotulos, RotWhileFim);
 
 		char rot[100];
-    //sprintf(rot, "%s: NADA", getRotulo(&tabelaRotulos, 2));
 		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
 	}
 	expressao DO
@@ -712,7 +710,6 @@ atribuicao:
 	{
 		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
-		printf("\n\n%s %d\n\n", variavelDestino->identificador, variavelDestino->deslocamento);
 		if (variavelDestino->pass == valor)
 			sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		else

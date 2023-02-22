@@ -28,7 +28,7 @@ typedef struct paramDesc {
 typedef struct stackNode {
 	char *identificador, *rotulo;
 	tipoCategoria category;
-	int nivel_lexico, deslocamento, numParams;
+	int nivel_lexico, deslocamento, numParams, numProcs;
 	tipoPascal tipo;
 	tipo_passado pass;
 	paramDesc *params;
@@ -58,5 +58,6 @@ int hasNext(pilha_simbolos *symbolsTable, const char * ident);
 void printTable(pilha_simbolos *symbolsTable);
 
 void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount);
+void updateNumProcs(stackNode *p, int procs);
 
 #endif

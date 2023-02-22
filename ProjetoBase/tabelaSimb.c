@@ -163,7 +163,7 @@ void printTable(pilha_simbolos *symbolsTable){
     }
 }
 void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount){
-    if (symbolsTable->tamanho < parameterCount)
+  if (symbolsTable->tamanho < parameterCount)
 		puts("Pilha não tem elementos o suficiente");
 	p->numParams = parameterCount;
 	p->params = (paramDesc*)malloc(parameterCount * sizeof(paramDesc));
@@ -179,4 +179,8 @@ void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount
 	if (p->category == funcao)
 		aux->deslocamento -= 2;
 	aux->numParams = parameterCount;
+}
+
+void updateNumProcs(stackNode *p, int procs) {
+	p->numProcs = procs;
 }
