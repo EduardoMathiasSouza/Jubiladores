@@ -262,7 +262,7 @@ declaracao_procedimento:
 ;
 
 declaracao_funcao: 
-	FUNCTION { EhSubrotina = 1; }
+  FUNCTION{ EhSubrotina = 1; }
   IDENT
   {
     proc_declarados++;
@@ -288,7 +288,7 @@ declaracao_funcao:
     procedimentoAtual = novaEntrada;
   }
   { novos_param = 0; } parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA
-	{
+  {
     // Zera para ser utilizado na subrotina
     // Mas salva valor para ser recuperado
     old_var = num_vars;
@@ -407,8 +407,8 @@ comando_condicional:
 ;
 
 if_then: 
-	IF expressao 
-	{  
+	IF expressao
+	{  	
 		initTemElse(); //inicializa se necessario, incrementa o iterador
 		// Gera rotulos de entrada e saida do IF
 		char *RotIfInicio = geraRotulo(RotId);
