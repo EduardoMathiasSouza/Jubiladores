@@ -53,9 +53,6 @@ void initTemElse() {
 	it_temElse++;
 }
 
-
-
-
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
@@ -397,13 +394,9 @@ desvio:
 comando_condicional:
 	if_then cond_else
 	{
-		if (!getTemElse()) {
-			char rot[100];
-			geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA"); 
-		}
 		char rot[100];
-		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
-		pop_pilhaRotulo(& tabelaRotulos, 2);
+		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA");  
+		pop_pilhaRotulo(&tabelaRotulos, 2);
 	}
 ;
 
@@ -445,6 +438,7 @@ cond_else:
 		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
 	}
 	else_multiplo_unico
+	| comando_vazio
 ;
 
 else_multiplo_unico:

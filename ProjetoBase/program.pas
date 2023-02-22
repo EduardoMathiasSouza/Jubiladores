@@ -1,21 +1,29 @@
-program exemplo1 (input, output);
-var k : integer;
-procedure p(    n : integer; var g:integer);
-var h : integer;
+program exemplo7(input, output);
+var x, y :  integer;
+procedure p;
+var z : integer;
 begin
-   if (n +1 > 2) then
-      g:=g+n
-   else
-   begin
-      h:=g;
-      p(n-1,h);
-      g:=h;
-      p(n-2, g)
-   end;
-   write(n,g)
+   z:=x; x:=x-1;
+   if z>1
+      then p
+   else y:=1;
+   y:=y*z
 end;
+
+procedure q;
+var s, t : integer;
 begin
-   k:=0;
-   p(3,k)
+   s:=x; t:=x-1; x:=t;
+   if s=0 then y:=1
+   else
+      if ( (s div 2)*2) = s
+         then q
+      else p;
+   y:=y*s
+end;
+
+begin
+   read(x);
+   q;
+   write(y)
 end.
-   
