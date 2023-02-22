@@ -3,7 +3,7 @@ var k : integer;
 procedure p(    n : integer; var g:integer);
 var h : integer;
 begin
-   if (n+1) then
+   if (n +1 > 2) then
       g:=g+n
    else
    begin

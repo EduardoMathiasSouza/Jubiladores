@@ -13,6 +13,7 @@
 #include "pilha.h"
 
 int receivingByReference;
+int last_cmp;
 int receivingFormalParams; 
 int proc_declarados;
 int num_vars, num_params, old_var, novas_var, novos_param, nivel_lexico, deslocamento;
@@ -407,7 +408,11 @@ comando_condicional:
 ;
 
 if_then: 
-	IF expressao
+	IF {last_cmp = 0;} expressao {
+		if(last_cmp != 1){ 
+			printf("Expressao nao e booleana.\n");
+			exit(1);}
+		}
 	{  	
 		initTemElse(); //inicializa se necessario, incrementa o iterador
 		// Gera rotulos de entrada e saida do IF
@@ -565,7 +570,7 @@ expressao:
 relacao_exp_simples_ou_vazio:
 	relacao expressao_simples
 	{
-		not_simple = 1; 
+		last_cmp = 1;
 		verifica_tipo(&tabelaTipo, "relacional");
 		geraCodigo(NULL, comparacao);
 	}
