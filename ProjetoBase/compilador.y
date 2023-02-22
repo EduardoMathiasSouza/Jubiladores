@@ -416,9 +416,9 @@ if_then:
 		char *RotIfFim = geraRotulo(RotId);
 		RotId++;
 
-		//push_pilhaRotulo(&tabelaRotulos, RotIfInicio);
-		push_pilhaRotulo(&tabelaRotulos, RotIfFim);
 		push_pilhaRotulo(&tabelaRotulos, RotIfInicio);
+		push_pilhaRotulo(&tabelaRotulos, RotIfFim);
+		//push_pilhaRotulo(&tabelaRotulos, RotIfInicio);
 			
 		// Imprime rotulo de entrada no inicio do if
 		char rot[100];
@@ -461,8 +461,6 @@ chama_procedimento:
 	lista_expressoes_ou_vazio
 	FECHA_PARENTESES
 	{
-		if (novos_param != procedimentoAtual->numParams)
-			imprimeErro("Número de parâmetros errado.\n"); 
 		entra_procedimento = 0;
 		geraCodigo(NULL, chama_proc); 
 		receivingFormalParams = 0;
@@ -695,9 +693,6 @@ fator:
 	}
 	lista_expressoes FECHA_PARENTESES
 	{
-		if (num_params_chamada != procedimentoAtual->numParams) {
-			imprimeErro("Número de parâmetros errado.");
-		} 
 		entra_procedimento = 0;
 		num_params_chamada = 0;
 		char chamaProcedure[100];
