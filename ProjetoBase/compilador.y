@@ -83,6 +83,7 @@ programa    :{
              PROGRAM IDENT
 			 			 parametros_ou_vazio PONTO_E_VIRGULA
              bloco PONTO {
+							 procedimentoAtual = pop_pilhaNode(&tabelaNode);
                pop(&tabelaSimbolos, procedimentoAtual->numVars + procedimentoAtual->numProcs);
                char dmem[1000];
 
@@ -245,7 +246,7 @@ declaracao_procedimento:
 			exit(1);
 		}
 		char command[100];
-		sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
+		sprintf(command, "RTPR %d, %d", nivel_lexico, procedimentoAtual->numParams);
 		geraCodigo(NULL, command);
 
 		novos_param = 0;
@@ -494,8 +495,6 @@ chama_funcao:
   lista_expressoes_ou_vazio
   FECHA_PARENTESES
   {
-    if (novos_param != procedimentoAtual->numParams)
-      imprimeErro("Número de parâmetros errado.\n");
     entra_procedimento = 0;
     geraCodigo(NULL, chama_proc);
     receivingFormalParams = 0;
