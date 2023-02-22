@@ -228,9 +228,6 @@ declaracao_procedimento:
 	bloco
 	{
 		procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
-		printf("\n\n%s %d %d %d\n\n", procedimentoAtual->identificador, procedimentoAtual->numVars, procedimentoAtual->numProcs, procedimentoAtual->numParams);
-		printTable(&tabelaSimbolos);
-		
 		pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
 		
 		// DMEM nas variaveis do procedimento
@@ -247,13 +244,11 @@ declaracao_procedimento:
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
 		}
-		printf("\n\n%s %d %d\n\n", procedimentoAtual->identificador, procedimentoAtual->numVars, procedimentoAtual->numProcs);
 		char command[100];
 		sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
 		geraCodigo(NULL, command);
 
 		novos_param = 0;
-		//geraCodigo(NULL, command);
 		nivel_lexico--;
 
 		variavelDestino = NULL; // Libera variavel destino
@@ -288,6 +283,8 @@ declaracao_funcao:
 		sprintf(cur_func, "%s", token);
     novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, nivel_lexico, 0, integer);
     push(&tabelaSimbolos, novaEntrada);
+    push_pilhaNode(&tabelaNode,  novaEntrada);
+    procedimentoAtual = novaEntrada;
   }
   { novos_param = 0; } parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA
 	{
@@ -299,15 +296,19 @@ declaracao_funcao:
   }
   bloco
   {
+    procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
+    pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
 
     // DMEM nas variaveis do procedimento
-    pop(&tabelaSimbolos, num_vars);
+    pop(&tabelaSimbolos, procedimentoAtual->numVars);
     char dmem[100];
-    sprintf(dmem, "DMEM %d", num_vars);
+    sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
     geraCodigo(NULL, dmem);
+    pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
 
     // Pega procedimento para printar infos da saida dele
-    variavelDestino = getNth(&tabelaSimbolos, num_params);
+    variavelDestino = getTop(&tabelaSimbolos);
+    printTable(&tabelaSimbolos);
     if(variavelDestino == NULL) {
       printf("Procedimento nao encontrado na tabela de simbolos.\n");
       exit(1);
@@ -316,10 +317,7 @@ declaracao_funcao:
     sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
     geraCodigo(NULL, command);
 
- 	  pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
-
     novos_param = 0;
-    //geraCodigo(NULL, command);
     nivel_lexico--;
 
     variavelDestino = NULL; // Libera variavel destino
