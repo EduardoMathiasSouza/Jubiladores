@@ -20,7 +20,7 @@ unsigned int temElse, it_temElse;
 int entra_procedimento;
 char chama_proc[100];
 char *RotFimSubrotina;
-int RotId = 1;
+int RotId = 0;
 int EhSubrotina = 0;
 char comparacao[100];
 pilha_simbolos tabelaSimbolos;
@@ -72,7 +72,10 @@ void initTemElse() {
 
 programa    :{
              geraCodigo (NULL, "INPP");
-             }
+             char * RotInicioSubrotina = geraRotulo(RotId);
+						 RotId++;
+						 push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+						}
              PROGRAM IDENT
 			 			 parametros_ou_vazio PONTO_E_VIRGULA
              bloco PONTO {
@@ -100,28 +103,24 @@ tipo:
 
 
 bloco       :
-        parte_declara_vars {declara_proc_func = 0;}
+        parte_declara_vars 
+				{
+					char rotsaida[100];
+      		sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,0));
+					geraCodigo(NULL, rotsaida);
+				}
 			  parte_declara_sub_rotinas
 			  {
-				if(proc_declarados > 0 && nivel_lexico == 0) {
-					//char command[100];
-					//sprintf(command, "%s: NADA", RotFimSubrotina);
-					geraCodigo("R00", "NADA"); 
-				} else if (declara_proc_func == 1) {
-					char rotsaida[100];
-      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,2));
-      		geraCodigo(rotsaida, "NADA");
-
-
-				}
-				declara_proc_func = 0;
+				char rotsaida[100];
+     		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,0));
+     		geraCodigo(rotsaida, "NADA");
 
 				}
               comando_composto
 ;
 
 parte_declara_vars:  var {
-      char amem[100];
+    char amem[100];
 		sprintf(amem, "AMEM %d", num_vars);
 		geraCodigo(NULL, amem); 
 } 
@@ -194,29 +193,17 @@ declaracao_procedimento:
 		// Gera rotulos de entrada e saida
 		char *RotInicioSubrotina = geraRotulo(RotId);
 		RotId++;
+		
 		RotFimSubrotina = geraRotulo(RotId);
 		RotId++;
-		push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
 		push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+		push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
 		nivel_lexico++;
-
-		// Soh imprime no primeiro pois desvia pra main
-		if(proc_declarados == 1) {
-			// Imprime rotulo de saida da subrotina
-			//char rotsaida[100];
-			//sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,2));
-			geraCodigo(NULL, "DSVS R00");
-		} else if (lastLexicalLevel(&tabelaSimbolos) == nivel_lexico - 1) {
-      // Imprime rotulo de saida da subrotina
-      char rotsaida[100];
-      sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,4));
-      geraCodigo(NULL, rotsaida);
-    } 
 
 		// Imprime rotulo de entrada da subrotina
 		char rotentrada[100];
 		sprintf(rotentrada, "ENPR %d", nivel_lexico);
-		geraCodigo(getRotulo(&tabelaRotulos, 1), rotentrada); 
+		geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada); 
 	
 		novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, nivel_lexico, 0);
 		push(&tabelaSimbolos, novaEntrada);
@@ -239,22 +226,15 @@ declaracao_procedimento:
 		geraCodigo(NULL, dmem);
 		
 		// Pega procedimento para printar infos da saida dele
-		variavelDestino = getNth(&tabelaSimbolos, num_params + 1);
+		variavelDestino = getNth(&tabelaSimbolos, num_params);
 		if(variavelDestino == NULL) {
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
 		}
+		printf("\n\n%s\n\n", variavelDestino->identificador);
 		char command[100];
 		sprintf(command, "RTPR %d, %d", nivel_lexico, variavelDestino->numParams);
 		geraCodigo(NULL, command);
-
-    /*stackNode * cur = getNth(&tabelaSimbolos, num_vars+1);
-    if (hasNext(&tabelaSimbolos, cur->identificador) && nivel_lexico != 1) {
-      char rotsaida[100];
-      sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,2));
-      geraCodigo(rotsaida, "NADA");
-    }*/
-
 
 		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
 
@@ -272,11 +252,66 @@ declaracao_procedimento:
 ;
 
 declaracao_funcao: 
-	FUNCTION IDENT
-	parametros_formais_vazio
-	DOIS_PONTOS tipo PONTO_E_VIRGULA
-	bloco
+	FUNCTION { EhSubrotina = 1; }
+  IDENT
+  {
+    proc_declarados++;
+    // Gera rotulos de entrada e saida
+    char *RotInicioSubrotina = geraRotulo(RotId);
+    RotId++;
 
+    RotFimSubrotina = geraRotulo(RotId);
+    RotId++;
+    push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+    push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
+    nivel_lexico++;
+
+    // Imprime rotulo de entrada da subrotina
+    char rotentrada[100];
+    sprintf(rotentrada, "ENPR %d", nivel_lexico);
+    geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
+
+    novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, nivel_lexico, 0, integer);
+    push(&tabelaSimbolos, novaEntrada);
+  }
+  { novos_param = 0; } parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA
+	{
+    // Zera para ser utilizado na subrotina
+    // Mas salva valor para ser recuperado
+    old_var = num_vars;
+    num_vars = 0;
+    deslocamento = 0;
+  }
+  bloco
+  {
+
+    // DMEM nas variaveis do procedimento
+    pop(&tabelaSimbolos, num_vars);
+    char dmem[100];
+    sprintf(dmem, "DMEM %d", num_vars);
+    geraCodigo(NULL, dmem);
+
+    // Pega procedimento para printar infos da saida dele
+    variavelDestino = getNth(&tabelaSimbolos, num_params);
+    if(variavelDestino == NULL) {
+      printf("Procedimento nao encontrado na tabela de simbolos.\n");
+      exit(1);
+    }
+    char command[100];
+    sprintf(command, "RTPR %d, %d", nivel_lexico, variavelDestino->numParams);
+    geraCodigo(NULL, command);
+
+ 	  pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
+
+    novos_param = 0;
+    //geraCodigo(NULL, command);
+    nivel_lexico--;
+
+    variavelDestino = NULL; // Libera variavel destino
+    num_vars = old_var;    // Restabelece numero de variaveis no nivel lexico
+    EhSubrotina = 0;
+    pop_pilhaRotulo(&tabelaRotulos, 2);
+  }
 ;
 
 parametros_formais_vazio:
@@ -330,6 +365,7 @@ comando_vazio:;
 
 comando_sem_rotulo:
 	variavel atribuicao_procedimento
+	| atribuicao_funcao
 	| desvio
 	| comando_composto
 	| comando_condicional
@@ -403,7 +439,6 @@ else_multiplo_unico:
 chama_procedimento:
     {
 		entra_procedimento = 1;
-		declara_proc_func = 0;
 		// Imprime rotulo de entrada da subrotina
 		procedimentoAtual = variavelDestino;
 		sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
@@ -434,6 +469,40 @@ chama_procedimento:
 	{ 
 		entra_procedimento = 0;
 	}
+;
+
+chama_funcao:
+    {
+    entra_procedimento = 1;
+    // Imprime rotulo de entrada da subrotina
+    procedimentoAtual = variavelDestino;
+    sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
+    geraCodigo(NULL, "AMEM 1"); // making up space for the function return
+    }
+  ABRE_PARENTESES {  receivingFormalParams = 1; novos_param = 0; }
+  lista_expressoes_ou_vazio
+  FECHA_PARENTESES
+  {
+    if (novos_param != procedimentoAtual->numParams)
+      imprimeErro("Número de parâmetros errado.\n");
+    entra_procedimento = 0;
+    geraCodigo(NULL, chama_proc);
+    receivingFormalParams = 0;
+  }
+  { variavelDestino = NULL; }
+  |
+  {
+    entra_procedimento = 1;
+    procedimentoAtual = variavelDestino;
+    // Imprime rotulo de entrada da subrotina
+    char chama_proc[100];
+    sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
+    geraCodigo(NULL, chama_proc);
+    variavelDestino = NULL;
+  }
+  {
+    entra_procedimento = 0;
+  }
 ;
 
 lista_expressoes_ou_vazio:
@@ -480,7 +549,7 @@ comando_repetitivo:
 
 
 
-lista_expressoes: expressao | expressao VIRGULA lista_expressoes;
+lista_expressoes: expressao | expressao {num_params_chamada++;} VIRGULA lista_expressoes;
 
 expressao:
    	{ novos_param++; } expressao_simples  relacao_exp_simples_ou_vazio 
@@ -558,15 +627,18 @@ fator:
 				char chamaProcedure[100];
 				sprintf(chamaProcedure, "CHPR %s, %d", variavel_carregada->rotulo, nivel_lexico);
 				geraCodigo(NULL, chamaProcedure);
+				
 			}
 			else {
 				char comando[100];
-				
+				int cur_params = entra_procedimento == 2 ? 
+												(procedimentoAtual->numParams - num_params_chamada + 1) : novos_param;
 				int pass = entra_procedimento == 0 ? variavel_carregada->pass :
-																				 procedimentoAtual->params[procedimentoAtual->numParams - novos_param].pass;
+																				 procedimentoAtual->params[procedimentoAtual->numParams - cur_params].pass;
+				
 				if (pass == valor || (pass == referencia && entra_procedimento == 1 && variavel_carregada->pass == referencia))
 					sprintf(comando, "CRVL %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
-				else if (entra_procedimento == 1 && pass == referencia)
+				else if (entra_procedimento >= 1 && pass == referencia)
           sprintf(comando, "CREN %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
 				else
 					sprintf(comando, "CRVI %d, %d", variavel_carregada->nivel_lexico, variavel_carregada->deslocamento);
@@ -597,6 +669,8 @@ fator:
 	}
 	| variavel ABRE_PARENTESES
 	{
+		entra_procedimento = 2;
+		num_params_chamada = 0;
 		if(variavel_carregada != NULL) {
 			if(variavel_carregada->category == funcao) {
 				procedimentoAtual = variavel_carregada;
@@ -607,9 +681,13 @@ fator:
 				procedimentoAtual = variavelDestino;
 			}
 		}
+		geraCodigo(NULL, "AMEM 1");
+		
 	}
 	lista_expressoes FECHA_PARENTESES
 	{ 
+		entra_procedimento = 0;
+		num_params_chamada = 0;
 		char chamaProcedure[100];
 		sprintf(chamaProcedure, "CHPR %s, %d", procedimentoAtual->rotulo, nivel_lexico);
 		geraCodigo(NULL, chamaProcedure);
@@ -621,7 +699,11 @@ fator:
 
 atribuicao_procedimento:
 	atribuicao
-	| chama_procedimento 
+	| chama_procedimento
+;
+
+atribuicao_funcao:
+	atribuicao | chama_funcao
 ;
 
 atribuicao:
@@ -629,6 +711,7 @@ atribuicao:
 	{
 		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
+		printf("\n\n%s\n\n", variavelDestino->identificador);
 		if (variavelDestino->pass == valor)
 			sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		else
