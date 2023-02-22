@@ -1,5 +1,5 @@
-#ifndef __PILHA__
-#define __PILHA__
+#ifndef __PILHA_H__
+#define __PILHA_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +45,5 @@ void cria_pilhaRotulo(pilhaRotulo *tabelaRot);
 void push_pilhaRotulo(pilhaRotulo *tabelaRot, char *novoRot);
 void pop_pilhaRotulo(pilhaRotulo *tabelaRot, int n);
 char* getRotulo(pilhaRotulo *tabelaRot, int n);
-
 
 #endif

@@ -81,6 +81,8 @@ stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexi
     newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
     strcpy(newNode->rotulo, rotulo);
     newNode->numParams = numParams;
+    newNode->numProcs = 0;
+    newNode->numVars = 0;
 
     return newNode;
 }
@@ -93,6 +95,8 @@ stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lex
     newNode->category = procedimento;
     newNode->nivel_lexico = lexicalLevel;
     newNode->numParams = numParams;
+    newNode->numVars = 0;
+    newNode->numProcs = 0;
     newNode->params = NULL;
     newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
     strcpy(newNode->rotulo, rotulo);
@@ -160,7 +164,9 @@ void printTable(pilha_simbolos *symbolsTable){
         printf("Num Params: %d | ", aux->numParams);
         printf("Pass: %d | ", aux->pass);
         aux = aux->prox;
-    }
+    		printf("\n");
+		}
+    printf("\n");
 }
 void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount){
   if (symbolsTable->tamanho < parameterCount)
@@ -181,6 +187,42 @@ void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount
 	aux->numParams = parameterCount;
 }
 
-void updateNumProcs(stackNode *p, int procs) {
-	p->numProcs = procs;
+void updateNumProcs(pilha_simbolos *p, int nivlex) {
+	stackNode * aux = p->topo;
+  while (aux->nivel_lexico != nivlex)
+    aux = aux->prox;
+  while (aux->category != funcao && aux->category != procedimento)
+    aux = aux->prox;	
+	aux->numProcs++;
 }
+
+void updateNumVars(pilha_simbolos *p, int vars, int nivlex) {
+  stackNode * aux = p->topo;
+	while (aux->nivel_lexico != nivlex)
+		aux = aux->prox;
+  while (aux->category != funcao && aux->category != procedimento)
+    aux = aux->prox;
+	aux->numVars = vars;
+}
+
+void cria_pilhaNode(pilhaNode * p) {
+  p->max = 8;
+  p->p = malloc(sizeof(stackNode*)*p->max);
+  p->topo = 0;
+}
+
+void * pop_pilhaNode(pilhaNode * p) {
+  p->topo--;
+  return(p->p[p->topo+1]);
+}
+
+void push_pilhaNode(pilhaNode * p, stackNode * x) {
+  if (p->topo == p->max-1) {
+    p->max*=2;
+    p->p = realloc(p->p, sizeof(stackNode*)*p->max);
+  }
+  p->topo++;
+  p->p[p->topo] = x;
+}
+
+ 

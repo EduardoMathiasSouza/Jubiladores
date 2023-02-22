@@ -27,6 +27,7 @@ pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
 pilhaRotulo tabelaRotulos;
+pilhaNode tabelaNode;
 int num_params_chamada, not_simple;
 int declara_proc_func;
 
@@ -75,13 +76,17 @@ programa    :{
              char * RotInicioSubrotina = geraRotulo(RotId);
 						 RotId++;
 						 push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+						 procedimentoAtual = createSimpleProcedureInput("main", RotInicioSubrotina, 0, 0);
+						 push(&tabelaSimbolos, procedimentoAtual);
+						 push_pilhaNode(&tabelaNode, procedimentoAtual);
 						}
              PROGRAM IDENT
 			 			 parametros_ou_vazio PONTO_E_VIRGULA
              bloco PONTO {
-               pop(&tabelaSimbolos, num_vars + proc_declarados);
+               pop(&tabelaSimbolos, procedimentoAtual->numVars + procedimentoAtual->numProcs);
                char dmem[1000];
-               sprintf(dmem, "DMEM %d", num_vars);
+
+               sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
                geraCodigo(NULL, dmem);
                geraCodigo (NULL, "PARA");
              }
@@ -114,7 +119,6 @@ bloco       :
 				char rotsaida[100];
      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,0));
      		geraCodigo(rotsaida, "NADA");
-				updateNumProcs(procedimentoAtual, declara_proc_func);
 				}
         comando_composto
 ;
@@ -122,6 +126,7 @@ bloco       :
 parte_declara_vars:  var {
     char amem[100];
 		sprintf(amem, "AMEM %d", num_vars);
+		updateNumVars(&tabelaSimbolos, num_vars, nivel_lexico);
 		geraCodigo(NULL, amem); 
 } 
 ;
@@ -132,8 +137,8 @@ parte_declara_sub_rotinas:
 ;
 
 opcoes_sub_rotinas:
-	declaracao_procedimento {declara_proc_func++;} PONTO_E_VIRGULA
-	| declaracao_funcao {declara_proc_func++;} PONTO_E_VIRGULA
+	declaracao_procedimento {updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA
+	| declaracao_funcao {updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA
 	| comando_vazio
 ;
 
@@ -174,12 +179,14 @@ lista_id_var: lista_id_var VIRGULA IDENT
 
 lista_idents: lista_idents VIRGULA IDENT{
 		novas_var++;
+		num_params++;
 		novaEntrada = createSimpleFormalParameterInput(token, nivel_lexico, 1, receivingByReference ? referencia : valor);
 		push(&tabelaSimbolos, novaEntrada);
 	}
    	| IDENT
 	{
 		novas_var++;
+		num_params++;
 		novaEntrada = createSimpleFormalParameterInput(token, nivel_lexico, 1, receivingByReference ? referencia : valor);
 		push(&tabelaSimbolos, novaEntrada);
 	}
@@ -207,6 +214,7 @@ declaracao_procedimento:
 	
 		novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, nivel_lexico, 0);
 		push(&tabelaSimbolos, novaEntrada);
+		push_pilhaNode(&tabelaNode,  novaEntrada);
 		procedimentoAtual = novaEntrada;
 	}
 	{ novos_param = 0; } parametros_formais_vazio PONTO_E_VIRGULA
@@ -219,15 +227,18 @@ declaracao_procedimento:
 	}
 	bloco
 	{
+		procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
+		printf("\n\n%s %d %d %d\n\n", procedimentoAtual->identificador, procedimentoAtual->numVars, procedimentoAtual->numProcs, procedimentoAtual->numParams);
+		printTable(&tabelaSimbolos);
 		
 		pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
 		
 		// DMEM nas variaveis do procedimento
-		pop(&tabelaSimbolos, num_vars);
+		pop(&tabelaSimbolos, procedimentoAtual->numVars);
 		char dmem[100];
-		sprintf(dmem, "DMEM %d", num_vars);
+		sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
 		geraCodigo(NULL, dmem);
-		pop(&tabelaSimbolos, num_params); // Remove parametros da tabela de simbolos
+		pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
 		
 		// Pega procedimento para printar infos da saida dele
 		variavelDestino = getTop(&tabelaSimbolos);
@@ -236,7 +247,7 @@ declaracao_procedimento:
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
 		}
-		printf("\n\n%s\n\n", variavelDestino->identificador);
+		printf("\n\n%s %d %d\n\n", procedimentoAtual->identificador, procedimentoAtual->numVars, procedimentoAtual->numProcs);
 		char command[100];
 		sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
 		geraCodigo(NULL, command);
@@ -328,6 +339,8 @@ ABRE_PARENTESES { num_params = 0; }
 	lista_parametros_formais
 	FECHA_PARENTESES
 	{
+		stackNode * x = getNth(&tabelaSimbolos, num_params);
+		printf("\nAS PARAMS %s %d\n\n", x->identificador, num_params);
 		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
 	}
@@ -339,7 +352,7 @@ lista_parametros_formais:
 ;
 
 secao_parametros_formais:
-   	{ num_params++; } var_vazio { novas_var = 0; } lista_idents DOIS_PONTOS tipo
+  var_vazio { novas_var = 0; } lista_idents DOIS_PONTOS tipo
 ;
 
 var_vazio:
@@ -684,7 +697,10 @@ fator:
 		
 	}
 	lista_expressoes FECHA_PARENTESES
-	{ 
+	{
+		if (num_params_chamada != procedimentoAtual->numParams) {
+			imprimeErro("Número de parâmetros errado.");
+		} 
 		entra_procedimento = 0;
 		num_params_chamada = 0;
 		char chamaProcedure[100];
@@ -814,6 +830,7 @@ int main (int argc, char** argv) {
    cria_pilha(&tabelaSimbolos);
    cria_pilhaTipo(&tabelaTipo);
    cria_pilhaRotulo(&tabelaRotulos);
+   cria_pilhaNode(&tabelaNode);
    cur_func = malloc(100);
    receivingByReference = 0;
    proc_declarados = 0;

@@ -1,6 +1,5 @@
 #include "pilha.h"
 
-
 void cria_pilhaTipo(pilhaTipo *typesTable){
     typesTable->topo = NULL;
     typesTable->tamanho = 0;
@@ -100,4 +99,5 @@ char* getRotulo(pilhaRotulo *tabelaRot, int n){
 		aux = aux->prox;}
     return aux->rot;
 }
+
 

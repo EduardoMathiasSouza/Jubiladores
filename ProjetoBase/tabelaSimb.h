@@ -1,5 +1,5 @@
-#ifndef __TABELA_SIMBOLOS__
-#define __TABELA_SIMBOLOS__
+#ifndef __TABELASIMB_H__
+#define __TABELASIMB_H__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@ typedef struct paramDesc {
 typedef struct stackNode {
 	char *identificador, *rotulo;
 	tipoCategoria category;
-	int nivel_lexico, deslocamento, numParams, numProcs;
+	int nivel_lexico, deslocamento, numParams, numProcs, numVars;
 	tipoPascal tipo;
 	tipo_passado pass;
 	paramDesc *params;
@@ -39,6 +39,11 @@ typedef struct pilha_simbolos {
 	int tamanho;
 	stackNode *topo;
 } pilha_simbolos;
+
+typedef struct pilhaNode {
+	int max, topo;
+	stackNode ** p;
+} pilhaNode;
 
 void cria_pilha(pilha_simbolos *symbolsTable);
 void push(pilha_simbolos *symbolsTable, stackNode *newSymbol);
@@ -58,6 +63,11 @@ int hasNext(pilha_simbolos *symbolsTable, const char * ident);
 void printTable(pilha_simbolos *symbolsTable);
 
 void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount);
-void updateNumProcs(stackNode *p, int procs);
+void updateNumProcs(pilha_simbolos *p, int nivlex);
+void updateNumVars(pilha_simbolos *p, int vars, int nivlex);
+
+void cria_pilhaNode(pilhaNode * p);
+void * pop_pilhaNode(pilhaNode * p);
+void push_pilhaNode(pilhaNode * p, stackNode * x);
 
 #endif
