@@ -22,7 +22,7 @@ char chama_proc[100];
 char *RotFimSubrotina;
 int RotId = 0;
 int EhSubrotina = 0;
-char comparacao[100];
+char comparacao[100], *cur_func;
 pilha_simbolos tabelaSimbolos;
 stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtual;
 pilhaTipo tabelaTipo;
@@ -271,6 +271,7 @@ declaracao_funcao:
     sprintf(rotentrada, "ENPR %d", nivel_lexico);
     geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
 
+		sprintf(cur_func, "%s", token);
     novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, nivel_lexico, 0, integer);
     push(&tabelaSimbolos, novaEntrada);
   }
@@ -711,7 +712,7 @@ atribuicao:
 	{
 		verifica_tipo(&tabelaTipo, "atribuicao");
 		char varLexDisp[100];
-		printf("\n\n%s\n\n", variavelDestino->identificador);
+		printf("\n\n%s %d\n\n", variavelDestino->identificador, variavelDestino->deslocamento);
 		if (variavelDestino->pass == valor)
 			sprintf(varLexDisp, "ARMZ %d, %d", variavelDestino->nivel_lexico, variavelDestino->deslocamento);
 		else
@@ -816,6 +817,7 @@ int main (int argc, char** argv) {
    cria_pilha(&tabelaSimbolos);
    cria_pilhaTipo(&tabelaTipo);
    cria_pilhaRotulo(&tabelaRotulos);
+   cur_func = malloc(100);
    receivingByReference = 0;
    proc_declarados = 0;
    yyin=fp;

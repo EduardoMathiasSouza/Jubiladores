@@ -176,5 +176,7 @@ void updateParams(stackNode *p, pilha_simbolos *symbolsTable, int parameterCount
 		aux->deslocamento = -4-i;
 		aux = aux->prox;
 	}
+	if (p->category == funcao)
+		aux->deslocamento -= 2;
 	aux->numParams = parameterCount;
 }
