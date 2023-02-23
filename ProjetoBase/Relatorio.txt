@@ -23,6 +23,8 @@ opcoes_subrotinas -> prototipo ( forward | corpo_procedimento )
 
 Outra alteração necessária foi a adição do rótulo de saída (o que desvia para após a declaração dos seus próprios procedimentos) do procedimento dentro de sua entrada na tabela de símbolos. Isso porque os rótulos de entrada/saída não podem ser imediatamente empilhados na declaração, já que o procedimento pode não ser implementado imediatamente após. Também foi necessário enviar a geração do código de cabeçalho (ENPR e rótulo) para o início do bloco. Anteriormente ela se encontrava no protótipo.
 
+Também foi necessário alterar o analisador léxico para reconhecer o token forward.
+
 
 O maior problema para fazer a alteração funcionar foi lidar com os rótulos. Houve um problema que consistia na geração de rótulos adicionais que nunca eram printados, o que se devia ao fato de que o id dos rótulos era aumentado tanto durante o forward quanto durante o protótipo da implementação real. A solução é que a maior parte do código do protótipo só é executado caso o procedimento não esteja na tabela de forward, isto é, se ele está sendo declarado com o forward pela primeira vez ou efetivamente implementado sem o forward. A função que checa se o proc está na tabela também atualiza tf->declared[i]. Funciona da seguinte forma:
 
