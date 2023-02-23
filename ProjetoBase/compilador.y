@@ -15,6 +15,7 @@
 int receivingByReference;
 int receivingFormalParams; 
 int proc_declarados;
+int last_cmp;
 int num_vars, num_params, old_var, novas_var, novos_param, nivel_lexico, deslocamento;
 unsigned int temElse, it_temElse;
 int entra_procedimento;
@@ -429,10 +430,6 @@ desvio:
 comando_condicional:
 	if_then cond_else
 	{
-		if (!getTemElse()) {
-			char rot[100];
-			geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA"); 
-		}
 		char rot[100];
 		geraCodigo(getRotulo(&tabelaRotulos, 2), "NADA"); 
 		pop_pilhaRotulo(& tabelaRotulos, 2);
@@ -440,8 +437,12 @@ comando_condicional:
 ;
 
 if_then: 
-	IF expressao 
-	{  
+	IF {last_cmp = 0;} expressao {
+		if(last_cmp != 1){ 
+			printf("Expressao nao e booleana.\n");
+			exit(1);}
+		}
+	{  	
 		initTemElse(); //inicializa se necessario, incrementa o iterador
 		// Gera rotulos de entrada e saida do IF
 		char *RotIfInicio = geraRotulo(RotId);
@@ -473,6 +474,7 @@ cond_else:
 		geraCodigo(getRotulo(&tabelaRotulos, 1), "NADA");
 	}
 	else_multiplo_unico
+	| comando_vazio
 ;
 
 else_multiplo_unico:
@@ -598,7 +600,7 @@ expressao:
 relacao_exp_simples_ou_vazio:
 	relacao expressao_simples
 	{
-		not_simple = 1; 
+		last_cmp = 1; 
 		verifica_tipo(&tabelaTipo, "relacional");
 		geraCodigo(NULL, comparacao);
 	}

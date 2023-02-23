@@ -29,7 +29,7 @@ char* define_tipo(tipoPascal type){
         case integer:
             return "integer";
         case boolean:
-            return "real";
+            return "boolean";
         default:
             return "tipo indefinido";
     }
@@ -37,11 +37,20 @@ char* define_tipo(tipoPascal type){
 void verifica_tipo(pilhaTipo *typesTable, char* operation){
     tipoPascal type1 = pop_pilhaTipo(typesTable);
     tipoPascal type2 = pop_pilhaTipo(typesTable);
-    if(type1 != type2){
-        printf("Erro de tipos na operacao %s", operation);
+    if(type1 == type2) { 
+        if(strcmp(operation, "atribuicao") != 0) {
+            if(strcmp(operation, "soma") == 0 || strcmp(operation, "subtracao") == 0
+                || strcmp(operation, "multiplicacao") == 0 || strcmp(operation, "divisao") == 0 || strcmp(operation, "div") == 0)
+                push_pilhaTipo(typesTable, integer);
+            else
+                push_pilhaTipo(typesTable, boolean);
+        }
+    }
+    else {
+        printf("Variaveis possuem tipos diferentes.\n");
+        printf("Operacao de %s com %s e %s\n", operation, define_tipo(type1), define_tipo(type2));
         exit(1);
     }
-    push_pilhaTipo(typesTable, type1);
 }
 
 void print_tabelatipo(pilhaTipo *typesTable){
