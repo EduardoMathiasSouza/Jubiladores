@@ -1,4 +1,4 @@
-program Maximum(output);
+Program Maximum_Minimum_Number(output);
 
 var 
     res: integer;
@@ -32,5 +32,5 @@ end;
 
 begin
   res := max(5,10);
-  write(res);
+  writeln(res);
 end.

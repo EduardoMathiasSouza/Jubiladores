@@ -224,6 +224,10 @@ corpo_funcao:
  		char rotentrada[100];
   	sprintf(rotentrada, "ENPR %d", nivel_lexico);
     geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
+
+		old_var = num_vars;
+		num_vars = 0;
+		deslocamento = 0;
 	}
   bloco
   {
@@ -269,6 +273,10 @@ corpo_procedimento:
     char rotentrada[100];
     sprintf(rotentrada, "ENPR %d", nivel_lexico);
     geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
+		
+		old_var = num_vars;
+		num_vars = 0;
+		deslocamento = 0;
 	}
   bloco
   {

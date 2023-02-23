@@ -167,6 +167,8 @@ void printTable(pilha_simbolos *symbolsTable){
         printf("Rotulo: %s | ", aux->rotulo);
         printf("Num Params: %d | ", aux->numParams);
         printf("Pass: %d | ", aux->pass);
+        printf("Num Vars: %d | ", aux->numVars);
+        printf("Num Procs: %d | ", aux->numProcs);
         aux = aux->prox;
     		printf("\n");
 		}
@@ -260,6 +262,7 @@ int push_tabelaForward(tabelaForward * tf, char * ident) {
 int update_tabelaForward(tabelaForward * tf, char * ident) {
 	for (int i = 0; i <= tf->topo - 1; i++) {
 		if (strcmp(ident, tf->idents[i]) == 0) {
+			printf("\n\nAT UPDATE TABELA %s %s\n\n", ident, tf->idents[i]);
 			if (tf->declared[i] == 1)
 				return 1;
 			tf->declared[i] = 1;

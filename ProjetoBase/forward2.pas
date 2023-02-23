@@ -1,4 +1,4 @@
-program OutputLines(output);
+Program OutputLines(output);
 
 procedure fun1() ; forward;
 

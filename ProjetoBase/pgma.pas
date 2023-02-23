@@ -1,20 +1,22 @@
-program exemplo75 (input, output);
-var m,n :  integer;
-function f ( n : integer; var k:integer ) : integer;
-var p, q : integer;
-begin    
-   if n<2 then
-      begin 
-         f:=n; k:=0
-      end
-   else
-      begin
-         f:=f(n-1,p) + f(n-2,q);
-         k:=p+q+1
-      end;
-   write (n, k)
-end;
+program exemplo73 (input, output);
+var n, s, i :  integer;
+   procedure soma;
+   var q : integer;
+   begin
+      q:=i*i;
+      if (i div 2) * 2 = i
+      then
+         s:=s+q
+      else
+         s:=s-q
+   end;
 begin
-   n:=f(3,m);
-   write(n, m)
+   read (n);
+   s:=0; i:=0;
+   while i<=n do
+   begin
+      soma; write(s); i:=i+1
+   end
 end.
+      
+      

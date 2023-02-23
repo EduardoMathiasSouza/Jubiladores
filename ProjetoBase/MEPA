@@ -2,7 +2,7 @@
      AMEM 1
      DSVS R00
 R03: ENPR 1 
-     AMEM 2
+     AMEM 1
      DSVS R04
 R04: NADA 
      CRVL 1, -5
@@ -10,15 +10,15 @@ R04: NADA
      CMMA
      DSVF R06
      CRVL 1, -4
-     ARMZ 1, 1
+     ARMZ 1, 0
      DSVS R05
 R06: NADA 
      CRVL 1, -5
-     ARMZ 1, 1
+     ARMZ 1, 0
 R05: NADA 
-     CRVL 1, 1
+     CRVL 1, 0
      ARMZ 1, -6
-     DMEM 2
+     DMEM 1
      RTPR 1, 2
 R01: ENPR 1 
      AMEM 1
@@ -29,15 +29,14 @@ R02: NADA
      CMMA
      DSVF R08
      CRVL 1, -5
-     ARMZ 1, 2
+     ARMZ 1, 0
      DSVS R07
 R08: NADA 
      CRVL 1, -4
-     ARMZ 1, 2
+     ARMZ 1, 0
 R07: NADA 
-     CRVL 1, 2
+     CRVL 1, 0
      ARMZ 1, -6
-     DMEM 1
      RTPR 1, 2
 R00: NADA 
      AMEM 1
