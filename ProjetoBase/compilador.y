@@ -113,7 +113,6 @@ tipo:
 bloco       :
         parte_declara_vars 
 				{
-					printf("GotHere\n");
 					char rotsaida[100];
       		sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,0));
 					geraCodigo(NULL, rotsaida);
@@ -123,6 +122,7 @@ bloco       :
 				char rotsaida[100];
      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,0));
      		geraCodigo(rotsaida, "NADA");
+				printTable(&tabelaSimbolos);
 				}
         comando_composto
 ;
@@ -147,13 +147,13 @@ opcoes_sub_rotinas:
 ;
 
 forward_or_not: FORWARD {push_tabelaForward(&tf, procedimentoAtual->identificador);
-												 updateNumProcs(&tabelaSimbolos, nivel_lexico+1);} PONTO_E_VIRGULA 
+												 updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA 
 			| { if (update_tabelaForward(&tf, token)) updateNumProcs(&tabelaSimbolos, nivel_lexico);} 
 					corpo_procedimento PONTO_E_VIRGULA
 ;
 
 forward_f_or_not: FORWARD {push_tabelaForward(&tf, procedimentoAtual->identificador);
-												 updateNumProcs(&tabelaSimbolos, nivel_lexico+1);} PONTO_E_VIRGULA 
+												 updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA 
 			| { if (update_tabelaForward(&tf, token)) updateNumProcs(&tabelaSimbolos, nivel_lexico);} 
 					corpo_funcao PONTO_E_VIRGULA
 ;
@@ -166,7 +166,7 @@ header_procedimento:
 		// Se não tiver sido "forwarded"
 		if (update_tabelaForward(&tf, token) != 0) {
     	proc_declarados++;
-			printf("");		
+			
 			// Gera rotulos de entrada e saida
     	char *RotInicioSubrotina = geraRotulo(RotId);
     	RotId++;
@@ -202,9 +202,8 @@ header_funcao:
     	novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, RotFimSubrotina, nivel_lexico, 0, integer);
     	push(&tabelaSimbolos, novaEntrada);
     	procedimentoAtual = novaEntrada;
-		} else {
+		} else
 			procedimentoAtual = search(&tabelaSimbolos, token);
-		}
 		novos_param = 0;
   }
   parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA {nivel_lexico--;}
@@ -232,14 +231,16 @@ corpo_funcao:
     pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
 
     // DMEM nas variaveis do procedimento
-    pop(&tabelaSimbolos, procedimentoAtual->numVars);
-    char dmem[100];
-    sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
-    geraCodigo(NULL, dmem);
+    if (procedimentoAtual->numVars > 0) {
+      pop(&tabelaSimbolos, procedimentoAtual->numVars);
+      char dmem[100];
+      sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
+      geraCodigo(NULL, dmem);
+    }
     pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
 
     char command[100];
-    sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
+    sprintf(command, "RTPR %d, %d", nivel_lexico, procedimentoAtual->numParams);
     geraCodigo(NULL, command);
 
     novos_param = 0;
