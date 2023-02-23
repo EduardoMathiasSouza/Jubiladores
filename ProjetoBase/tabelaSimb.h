@@ -40,6 +40,12 @@ typedef struct pilha_simbolos {
 	stackNode *topo;
 } pilha_simbolos;
 
+typedef struct tabelaForward {
+	int max, int topo;
+	int *declared;
+	char ** idents;
+} tabelaForward;
+
 typedef struct pilhaNode {
 	int max, topo;
 	stackNode ** p;
@@ -69,5 +75,10 @@ void updateNumVars(pilha_simbolos *p, int vars, int nivlex);
 void cria_pilhaNode(pilhaNode * p);
 void * pop_pilhaNode(pilhaNode * p);
 void push_pilhaNode(pilhaNode * p, stackNode * x);
+
+void cria_tabelaForward(tabelaForward * tf);
+int push_tabelaForward(tabelaForward * tf, char * ident);
+int update_tabelaForward(tabelaForward * tf, char * ident);
+int anyLeft_tabelaForward(tabelaForward * tf);
 
 #endif

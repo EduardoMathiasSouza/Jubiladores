@@ -225,4 +225,46 @@ void push_pilhaNode(pilhaNode * p, stackNode * x) {
   p->p[p->topo] = x;
 }
 
+void cria_tabelaForward(tabelaForward * tf) {
+	tf->max = 8;
+	tf->declared = malloc(sizeof(int)*tf->max);
+	tf->idents = malloc(sizeof(char*)*tf->max);
+	tf->topo = 0;
+}
+
+int push_tabelaForward(tabelaForward * tf, char * ident) {
+	for (int i = 0; i <= tf->topo-1; i++) {
+		if (strcmp(ident, tf->idents[i]) == 0) {
+			printf("Erro: função já declarada");
+			exit(-1);
+		}
+	}
+	if (tf->topo == tf->max-1) {
+		tf->max *= 2;
+		tf->declared = realloc(tf->declared, sizeof(int)*tf->max);
+		tf->idents = realloc(tf->idents, sizeof(char*)*tf->max);
+	}
+
+	strcmp(tf->idents[tf->max], ident);
+	tf->declared[tf->max] = 0;
+	tf->max++;
+	return 0;
+}
+
+int update_tabelaForward(tabelaForward * tf, char * ident) {
+	for (int i = 0; i <= tf->topo - 1; i++) {
+		if (strcmp(ident, tf->idents[i]) == 0) {
+			tf->declared[i] = 1;
+			return 0;
+		}
+	}
+	return 1;
+}
+
+int anyLeft_tabelaForward(tabelaForward * tf) {
+	for (int i = 0; i <= tf->topo - 1; i++)
+		if (tf->declared[i] == 0)
+			return 1;
+	return 0;
+}
  
