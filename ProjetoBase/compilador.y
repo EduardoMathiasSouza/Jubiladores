@@ -238,7 +238,6 @@ declaracao_procedimento:
 		
 		// Pega procedimento para printar infos da saida dele
 		variavelDestino = getTop(&tabelaSimbolos);
-		printTable(&tabelaSimbolos);
 		if(variavelDestino == NULL) {
 			printf("Procedimento nao encontrado na tabela de simbolos.\n");
 			exit(1);
@@ -307,7 +306,6 @@ declaracao_funcao:
 
     // Pega procedimento para printar infos da saida dele
     variavelDestino = getTop(&tabelaSimbolos);
-    printTable(&tabelaSimbolos);
     if(variavelDestino == NULL) {
       printf("Procedimento nao encontrado na tabela de simbolos.\n");
       exit(1);
@@ -337,7 +335,6 @@ ABRE_PARENTESES { num_params = 0; }
 	FECHA_PARENTESES
 	{
 		stackNode * x = getNth(&tabelaSimbolos, num_params);
-		printf("\nAS PARAMS %s %d\n\n", x->identificador, num_params);
 		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
 	}
@@ -497,19 +494,6 @@ chama_funcao:
     receivingFormalParams = 0;
   }
   { variavelDestino = NULL; }
-  |
-  {
-    entra_procedimento = 1;
-    procedimentoAtual = variavelDestino;
-    // Imprime rotulo de entrada da subrotina
-    char chama_proc[100];
-    sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
-    geraCodigo(NULL, chama_proc);
-    variavelDestino = NULL;
-  }
-  {
-    entra_procedimento = 0;
-  }
 ;
 
 lista_expressoes_ou_vazio:
