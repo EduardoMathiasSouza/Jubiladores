@@ -123,7 +123,6 @@ bloco       :
 				char rotsaida[100];
      		sprintf(rotsaida, "%s", getRotulo(&tabelaRotulos,0));
      		geraCodigo(rotsaida, "NADA");
-				printTable(&tabelaSimbolos);
 				}
         comando_composto
 ;
@@ -191,7 +190,6 @@ header_funcao:
 		nivel_lexico++;
 		
 		if (update_tabelaForward(&tf, token) != 0) {
-  		printf("\nInside header func%s\n", token);
 	  	proc_declarados++;
     	// Gera rotulos de entrada e saida
     	char *RotInicioSubrotina = geraRotulo(RotId);
@@ -369,7 +367,6 @@ ABRE_PARENTESES { num_params = 0; }
 	FECHA_PARENTESES
 	{
 		stackNode * x = getNth(&tabelaSimbolos, num_params);
-		printf("\nAS PARAMS %s %d\n\n", x->identificador, num_params);
 		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
 	}
@@ -533,19 +530,6 @@ chama_funcao:
     receivingFormalParams = 0;
   }
   { variavelDestino = NULL; }
-  |
-  {
-    entra_procedimento = 1;
-    procedimentoAtual = variavelDestino;
-    // Imprime rotulo de entrada da subrotina
-    char chama_proc[100];
-    sprintf(chama_proc, "CHPR %s, %d", variavelDestino->rotulo, nivel_lexico);
-    geraCodigo(NULL, chama_proc);
-    variavelDestino = NULL;
-  }
-  {
-    entra_procedimento = 0;
-  }
 ;
 
 lista_expressoes_ou_vazio:
@@ -865,5 +849,7 @@ int main (int argc, char** argv) {
    yyin=fp;
    yyparse();
 
+	 if (anyLeft_tabelaForward(&tf))
+			imprimeErro("Há funções forwarded sem implementação.");
    return 0;
 }

@@ -253,7 +253,6 @@ int push_tabelaForward(tabelaForward * tf, char * ident) {
 	
 	tf->idents[tf->topo] = malloc(sizeof(char)*(strlen(ident)+1));
 	strcpy(tf->idents[tf->topo], ident);
-	printf("\n\nPUSH FORWARD %s\n\n", tf->idents[tf->topo]);
 	tf->declared[tf->topo] = 0;
 	tf->topo++;
 	return 0;
@@ -262,7 +261,6 @@ int push_tabelaForward(tabelaForward * tf, char * ident) {
 int update_tabelaForward(tabelaForward * tf, char * ident) {
 	for (int i = 0; i <= tf->topo - 1; i++) {
 		if (strcmp(ident, tf->idents[i]) == 0) {
-			printf("\n\nAT UPDATE TABELA %s %s\n\n", ident, tf->idents[i]);
 			if (tf->declared[i] == 1)
 				return 1;
 			tf->declared[i] = 1;
