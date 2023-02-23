@@ -1,0 +1,35 @@
+
+2 - modificação do compilador
+
+Nota: toda menção a procedimento aqui se refere às funções também.
+
+A ideia inicial era fazer uma tabela que mantivesse informações sobre os procedimentos "forwarded". Essa tabela não podia ser implementada como pilha, pois os procedimentos podem ser implementados em qualquer ordem. Portanto, criou-se uma estrutura de dados "tabelaForward" (tabelaSimb.h) que mantém as informações necessárias.
+
+Essa estrutura é implementada com um vetor de strings "idents", um vetor de inteiros "declared", um topo que indica o número de funções na pilha e um max que indica o tamanho total da tabela. tf.idents[i] é o identificador do i-ésimo procedimento forwarded no código, e tf.declared[i] é 1 se o procedimento já recebeu declaração, e 0 se ainda não foi declarado.
+
+Dois desafios a serem observados: todos os procedimentos forwarded precisam de implementações, e um procedimento não pode ser forwarded mais de uma vez.
+
+A função anyLeft_tabelaForward() indica se há algum proc forwarded não implementado, e é chamada ao fim do parsing, gerando erro caso haja.
+
+Quanto ao segundo desafio, foi resolvido da seguinte forma. A função push_tabelaForward() gera erro caso o procedimento a ser forwarded já tenha recebido essa declaração, e é chamada após encontrar o token FORWARD. 
+
+
+A ideia funcionou como um todo, e as alterações necessárias envolveram a adaptação do código, descritas a seguir.
+
+
+A maior alteração no código consistiu em quebrar a regra de declaração de procedimento, que incluía todo o corpo do proc, incluindo os parâmetros e o bloco, em duas regras diferentes, uma apenas com o protótipo, e outra para o corpo. Isso permite que duas coisas diferentes possam seguir o protótipo: o forward e a implementação.
+
+opcoes_subrotinas -> prototipo ( forward | corpo_procedimento )
+
+Outra alteração necessária foi a adição do rótulo de saída (o que desvia para após a declaração dos seus próprios procedimentos) do procedimento dentro de sua entrada na tabela de símbolos. Isso porque os rótulos de entrada/saída não podem ser imediatamente empilhados na declaração, já que o procedimento pode não ser implementado imediatamente após. Também foi necessário enviar a geração do código de cabeçalho (ENPR e rótulo) para o início do bloco. Anteriormente ela se encontrava no protótipo.
+
+
+O maior problema para fazer a alteração funcionar foi lidar com os rótulos. Houve um problema que consistia na geração de rótulos adicionais que nunca eram printados, o que se devia ao fato de que o id dos rótulos era aumentado tanto durante o forward quanto durante o protótipo da implementação real. A solução é que a maior parte do código do protótipo só é executado caso o procedimento não esteja na tabela de forward, isto é, se ele está sendo declarado com o forward pela primeira vez ou efetivamente implementado sem o forward. A função que checa se o proc está na tabela também atualiza tf->declared[i]. Funciona da seguinte forma:
+
+- Caso o procedimento não tenha sido forwarded, a função retorna valor diferente de zero e o procedimento é criado e adicionado na tabela de símbolos, seus rótulos gerados e enviados junto para essa tabela.
+	- Caso o que siga a declaração seja o forward, o procedimento é adicionado na tabela de forward.
+
+- Caso o procedimento tenha sido forwarded mas não implementado, a função atualiza a entrada correspondente na tabela, indicando que o procedimento está implementado. O código do protótipo não é executado, pois a função retorna 0 nesse caso.
+	- Caso o que siga a declaraçao seja outro forward, o procedimento é adicionado de novo na tabela, o que gera um erro e aborta a compilação.
+
+Isso garante todas as condições da alteração.
