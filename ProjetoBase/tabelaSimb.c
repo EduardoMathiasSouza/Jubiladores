@@ -67,7 +67,7 @@ stackNode* createSimpleVarInput(char *identificador, int lexicalLevel, int displ
     return newNode;
 }
 
-stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexicalLevel, int numParams, tipoPascal returnType){
+stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, char *rotulo_saida, int lexicalLevel, int numParams, tipoPascal returnType){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
     newNode->identificador = (char*)malloc((strlen(identificador)+1) * sizeof(char));
@@ -78,15 +78,17 @@ stackNode* createSimpleFunctionInput(char *identificador, char *rotulo, int lexi
     newNode->deslocamento = -4-numParams;
     newNode->params = NULL;
     newNode->tipo = returnType;
-    newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
+    newNode->rotulo = (char*)malloc((strlen(rotulo)+1) * sizeof(char));
     strcpy(newNode->rotulo, rotulo);
+    newNode->rotulo_saida = (char*)malloc((strlen(rotulo_saida)+1) * sizeof(char));
+    strcpy(newNode->rotulo_saida, rotulo_saida);
     newNode->numParams = numParams;
     newNode->numProcs = 0;
     newNode->numVars = 0;
 
     return newNode;
 }
-stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lexicalLevel, int numParams){
+stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, char *rotulo_saida, int lexicalLevel, int numParams){
     stackNode *newNode = (stackNode*)malloc(sizeof(stackNode));
 
     newNode->identificador = (char*)malloc((strlen(identificador)+1) * sizeof(char));
@@ -101,6 +103,8 @@ stackNode* createSimpleProcedureInput(char *identificador, char *rotulo, int lex
     newNode->rotulo = (char*)malloc(strlen(rotulo) * sizeof(char));
     strcpy(newNode->rotulo, rotulo);
 
+    newNode->rotulo_saida = (char*)malloc(strlen(rotulo_saida) * sizeof(char));
+    strcpy(newNode->rotulo_saida, rotulo_saida);
 
     return newNode;
 }
@@ -244,16 +248,20 @@ int push_tabelaForward(tabelaForward * tf, char * ident) {
 		tf->declared = realloc(tf->declared, sizeof(int)*tf->max);
 		tf->idents = realloc(tf->idents, sizeof(char*)*tf->max);
 	}
-
-	strcmp(tf->idents[tf->max], ident);
-	tf->declared[tf->max] = 0;
-	tf->max++;
+	
+	tf->idents[tf->topo] = malloc(sizeof(char)*(strlen(ident)+1));
+	strcpy(tf->idents[tf->topo], ident);
+	printf("\n\nPUSH FORWARD %s\n\n", tf->idents[tf->topo]);
+	tf->declared[tf->topo] = 0;
+	tf->topo++;
 	return 0;
 }
 
 int update_tabelaForward(tabelaForward * tf, char * ident) {
 	for (int i = 0; i <= tf->topo - 1; i++) {
 		if (strcmp(ident, tf->idents[i]) == 0) {
+			if (tf->declared[i] == 1)
+				return 1;
 			tf->declared[i] = 1;
 			return 0;
 		}

@@ -6,6 +6,9 @@ SOLVED: subsequent pass by reference should be by value (2)
 SOLVED:	functions not implemented
 SOLVED:	breaking with nested proc declarations
 
+				if/else if/else not implemented
+				bool/int error checking
+
 possible issues:
 - label mismatch -- solved
 - "desvio" empty

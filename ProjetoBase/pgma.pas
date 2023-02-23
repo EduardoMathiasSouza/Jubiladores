@@ -1,32 +1,20 @@
-program exemplo74 (input, output);
-var z, x: integer;
-   procedure g(t, u:integer);
-   var y, a : integer;
-   begin
-      y:=t*t; z:=z+x+y;
-      write(z)
-   end;
-
-   procedure h (y : integer);
-   var x : integer;
-      procedure f(y, v : integer);
-      var t, b : integer;
+program exemplo75 (input, output);
+var m,n :  integer;
+function f ( n : integer; var k:integer ) : integer;
+var p, q : integer;
+begin    
+   if n<2 then
+      begin 
+         f:=n; k:=0
+      end
+   else
       begin
-         t:=z+x+y; 
-				 g(t, 1);
-         z:=t
+         f:=f(n-1,p) + f(n-2,q);
+         k:=p+q+1
       end;
-   begin
-      x:=y+1;
-      f(x, 1);
-      g(z+x, 0)
-   end;
+   write (n, k)
+end;
 begin
-   z:=1;
-   x:=3;
-   h(x);
-   g(x, 0);
-   write(x,z)
+   n:=f(3,m);
+   write(n, m)
 end.
-   
-

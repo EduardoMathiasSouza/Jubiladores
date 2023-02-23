@@ -28,6 +28,7 @@ stackNode *novaEntrada, *variavelDestino, *variavel_carregada, *procedimentoAtua
 pilhaTipo tabelaTipo;
 pilhaRotulo tabelaRotulos;
 pilhaNode tabelaNode;
+tabelaForward tf;
 int num_params_chamada, not_simple;
 int declara_proc_func;
 
@@ -66,7 +67,7 @@ void initTemElse() {
 %token SOMA SUBTRACAO MULTIPLICACAO DIVISAO DIV
 %token NUMERO READ WRITE
 %token OR AND NOT 
-%token PROCEDURE FUNCTION
+%token PROCEDURE FUNCTION FORWARD
 
 
 %%
@@ -76,7 +77,7 @@ programa    :{
              char * RotInicioSubrotina = geraRotulo(RotId);
 						 RotId++;
 						 push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
-						 procedimentoAtual = createSimpleProcedureInput("main", RotInicioSubrotina, 0, 0);
+						 procedimentoAtual = createSimpleProcedureInput("main", RotInicioSubrotina, "", 0, 0);
 						 push(&tabelaSimbolos, procedimentoAtual);
 						 push_pilhaNode(&tabelaNode, procedimentoAtual);
 						}
@@ -86,9 +87,10 @@ programa    :{
 							 procedimentoAtual = pop_pilhaNode(&tabelaNode);
                pop(&tabelaSimbolos, procedimentoAtual->numVars + procedimentoAtual->numProcs);
                char dmem[1000];
-
-               sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
-               geraCodigo(NULL, dmem);
+							 if (procedimentoAtual->numVars > 0) {
+               	sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
+              	geraCodigo(NULL, dmem);
+							 }
                geraCodigo (NULL, "PARA");
              }
 ;
@@ -99,7 +101,7 @@ parametros_ou_vazio:
 ;
 
 parametros:
-	ABRE_PARENTESES lista_idents FECHA_PARENTESES
+	ABRE_PARENTESES lista_id_ou_vazio FECHA_PARENTESES
 ;
 
 tipo:
@@ -111,6 +113,7 @@ tipo:
 bloco       :
         parte_declara_vars 
 				{
+					printf("GotHere\n");
 					char rotsaida[100];
       		sprintf(rotsaida, "DSVS %s", getRotulo(&tabelaRotulos,0));
 					geraCodigo(NULL, rotsaida);
@@ -129,7 +132,7 @@ parte_declara_vars:  var {
 		sprintf(amem, "AMEM %d", num_vars);
 		updateNumVars(&tabelaSimbolos, num_vars, nivel_lexico);
 		geraCodigo(NULL, amem); 
-} 
+} | comando_vazio 
 ;
 
 parte_declara_sub_rotinas:
@@ -138,11 +141,161 @@ parte_declara_sub_rotinas:
 ;
 
 opcoes_sub_rotinas:
-	declaracao_procedimento {updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA
-	| declaracao_funcao {updateNumProcs(&tabelaSimbolos, nivel_lexico);} PONTO_E_VIRGULA
+	header_procedimento forward_or_not
+	| header_funcao forward_f_or_not
 	| comando_vazio
 ;
 
+forward_or_not: FORWARD {push_tabelaForward(&tf, procedimentoAtual->identificador);
+												 updateNumProcs(&tabelaSimbolos, nivel_lexico+1);} PONTO_E_VIRGULA 
+			| { if (update_tabelaForward(&tf, token)) updateNumProcs(&tabelaSimbolos, nivel_lexico);} 
+					corpo_procedimento PONTO_E_VIRGULA
+;
+
+forward_f_or_not: FORWARD {push_tabelaForward(&tf, procedimentoAtual->identificador);
+												 updateNumProcs(&tabelaSimbolos, nivel_lexico+1);} PONTO_E_VIRGULA 
+			| { if (update_tabelaForward(&tf, token)) updateNumProcs(&tabelaSimbolos, nivel_lexico);} 
+					corpo_funcao PONTO_E_VIRGULA
+;
+
+header_procedimento:
+	PROCEDURE {EhSubrotina = 1;}
+	IDENT {
+		nivel_lexico++;
+		
+		// Se não tiver sido "forwarded"
+		if (update_tabelaForward(&tf, token) != 0) {
+    	proc_declarados++;
+			printf("");		
+			// Gera rotulos de entrada e saida
+    	char *RotInicioSubrotina = geraRotulo(RotId);
+    	RotId++;
+
+    	RotFimSubrotina = geraRotulo(RotId);
+    	RotId++;
+	
+			novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, RotFimSubrotina, nivel_lexico, 0);
+    	push(&tabelaSimbolos, novaEntrada);
+    	procedimentoAtual = novaEntrada;
+		} else
+			procedimentoAtual = search(&tabelaSimbolos, token);
+		novos_param = 0;
+	}
+	parametros_formais_vazio PONTO_E_VIRGULA {nivel_lexico--;}
+;
+
+header_funcao:
+  FUNCTION { EhSubrotina = 1; }
+  IDENT {
+		nivel_lexico++;
+		
+		if (update_tabelaForward(&tf, token) != 0) {
+  		printf("\nInside header func%s\n", token);
+	  	proc_declarados++;
+    	// Gera rotulos de entrada e saida
+    	char *RotInicioSubrotina = geraRotulo(RotId);
+    	RotId++;
+
+    	RotFimSubrotina = geraRotulo(RotId);
+    	RotId++;
+
+    	novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, RotFimSubrotina, nivel_lexico, 0, integer);
+    	push(&tabelaSimbolos, novaEntrada);
+    	procedimentoAtual = novaEntrada;
+		} else {
+			procedimentoAtual = search(&tabelaSimbolos, token);
+		}
+		novos_param = 0;
+  }
+  parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA {nivel_lexico--;}
+;
+
+corpo_funcao:
+	{
+		nivel_lexico++;
+  	push_pilhaNode(&tabelaNode, procedimentoAtual);
+
+  	char * RotInicioSubrotina = procedimentoAtual->rotulo;
+  	RotFimSubrotina = procedimentoAtual->rotulo_saida;
+
+  	push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+  	push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
+
+  	// Imprime rotulo de entrada da subrotina
+ 		char rotentrada[100];
+  	sprintf(rotentrada, "ENPR %d", nivel_lexico);
+    geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
+	}
+  bloco
+  {
+    procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
+    pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
+
+    // DMEM nas variaveis do procedimento
+    pop(&tabelaSimbolos, procedimentoAtual->numVars);
+    char dmem[100];
+    sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
+    geraCodigo(NULL, dmem);
+    pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
+
+    char command[100];
+    sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
+    geraCodigo(NULL, command);
+
+    novos_param = 0;
+    nivel_lexico--;
+
+    variavelDestino = NULL; // Libera variavel destino
+    num_vars = old_var;    // Restabelece numero de variaveis no nivel lexico
+    EhSubrotina = 0;
+    pop_pilhaRotulo(&tabelaRotulos, 2);
+  }
+;
+
+
+corpo_procedimento:
+	{
+    nivel_lexico++;
+		push_pilhaNode(&tabelaNode, procedimentoAtual);
+
+		char * RotInicioSubrotina = procedimentoAtual->rotulo;   
+		RotFimSubrotina = procedimentoAtual->rotulo_saida;
+
+		push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
+    push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);   
+	
+    // Imprime rotulo de entrada da subrotina
+    char rotentrada[100];
+    sprintf(rotentrada, "ENPR %d", nivel_lexico);
+    geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
+	}
+  bloco
+  {
+    procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
+    pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
+
+    // DMEM nas variaveis do procedimento
+   	if (procedimentoAtual->numVars > 0) {
+	 		pop(&tabelaSimbolos, procedimentoAtual->numVars);
+    	char dmem[100];
+			sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
+    	geraCodigo(NULL, dmem);
+		}
+    pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
+
+    char command[100];
+    sprintf(command, "RTPR %d, %d", nivel_lexico, procedimentoAtual->numParams);
+    geraCodigo(NULL, command);
+
+    novos_param = 0;
+    nivel_lexico--;
+
+    variavelDestino = NULL; // Libera variavel destino
+    num_vars = old_var;    // Restabelece numero de variaveis no nivel lexico
+    EhSubrotina = 0;
+    pop_pilhaRotulo(&tabelaRotulos, 2);
+  }
+;
 
 var         : VAR declara_vars
             | declara_vars
@@ -178,6 +331,8 @@ lista_id_var: lista_id_var VIRGULA IDENT
                 }
 ;
 
+lista_id_ou_vazio: lista_idents | comando_vazio;
+
 lista_idents: lista_idents VIRGULA IDENT{
 		novas_var++;
 		num_params++;
@@ -193,141 +348,6 @@ lista_idents: lista_idents VIRGULA IDENT{
 	}
 ;
 
-declaracao_procedimento:
-	PROCEDURE { EhSubrotina = 1; }
-	IDENT
-	{
-		proc_declarados++;
-		// Gera rotulos de entrada e saida
-		char *RotInicioSubrotina = geraRotulo(RotId);
-		RotId++;
-		
-		RotFimSubrotina = geraRotulo(RotId);
-		RotId++;
-		push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
-		push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
-		nivel_lexico++;
-
-		// Imprime rotulo de entrada da subrotina
-		char rotentrada[100];
-		sprintf(rotentrada, "ENPR %d", nivel_lexico);
-		geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada); 
-	
-		novaEntrada = createSimpleProcedureInput(token, RotInicioSubrotina, nivel_lexico, 0);
-		push(&tabelaSimbolos, novaEntrada);
-		push_pilhaNode(&tabelaNode,  novaEntrada);
-		procedimentoAtual = novaEntrada;
-	}
-	{ novos_param = 0; } parametros_formais_vazio PONTO_E_VIRGULA
-	{
-		// Zera para ser utilizado na subrotina
-		// Mas salva valor para ser recuperado
-		old_var = num_vars;
-		num_vars = 0;
-		deslocamento = 0;
-	}
-	bloco
-	{
-		procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
-		pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
-		
-		// DMEM nas variaveis do procedimento
-		pop(&tabelaSimbolos, procedimentoAtual->numVars);
-		char dmem[100];
-		sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
-		geraCodigo(NULL, dmem);
-		pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
-		
-		// Pega procedimento para printar infos da saida dele
-		variavelDestino = getTop(&tabelaSimbolos);
-		printTable(&tabelaSimbolos);
-		if(variavelDestino == NULL) {
-			printf("Procedimento nao encontrado na tabela de simbolos.\n");
-			exit(1);
-		}
-		char command[100];
-		sprintf(command, "RTPR %d, %d", nivel_lexico, procedimentoAtual->numParams);
-		geraCodigo(NULL, command);
-
-		novos_param = 0;
-		nivel_lexico--;
-
-		variavelDestino = NULL; // Libera variavel destino
-		num_vars = old_var;    // Restabelece numero de variaveis no nivel lexico
-		EhSubrotina = 0;
-		pop_pilhaRotulo(&tabelaRotulos, 2);
-
-
-	}
-;
-
-declaracao_funcao: 
-	FUNCTION { EhSubrotina = 1; }
-  IDENT
-  {
-    proc_declarados++;
-    // Gera rotulos de entrada e saida
-    char *RotInicioSubrotina = geraRotulo(RotId);
-    RotId++;
-
-    RotFimSubrotina = geraRotulo(RotId);
-    RotId++;
-    push_pilhaRotulo(&tabelaRotulos, RotInicioSubrotina);
-    push_pilhaRotulo(&tabelaRotulos, RotFimSubrotina);
-    nivel_lexico++;
-
-    // Imprime rotulo de entrada da subrotina
-    char rotentrada[100];
-    sprintf(rotentrada, "ENPR %d", nivel_lexico);
-    geraCodigo(getRotulo(&tabelaRotulos, 2), rotentrada);
-
-		sprintf(cur_func, "%s", token);
-    novaEntrada = createSimpleFunctionInput(token, RotInicioSubrotina, nivel_lexico, 0, integer);
-    push(&tabelaSimbolos, novaEntrada);
-    push_pilhaNode(&tabelaNode,  novaEntrada);
-    procedimentoAtual = novaEntrada;
-  }
-  { novos_param = 0; } parametros_formais_vazio DOIS_PONTOS tipo PONTO_E_VIRGULA
-	{
-    // Zera para ser utilizado na subrotina
-    // Mas salva valor para ser recuperado
-    old_var = num_vars;
-    num_vars = 0;
-    deslocamento = 0;
-  }
-  bloco
-  {
-    procedimentoAtual = (stackNode*) pop_pilhaNode(&tabelaNode);
-    pop(&tabelaSimbolos, procedimentoAtual->numProcs); // Remove procedimentos da tabela de simbolos
-
-    // DMEM nas variaveis do procedimento
-    pop(&tabelaSimbolos, procedimentoAtual->numVars);
-    char dmem[100];
-    sprintf(dmem, "DMEM %d", procedimentoAtual->numVars);
-    geraCodigo(NULL, dmem);
-    pop(&tabelaSimbolos, procedimentoAtual->numParams); // Remove parametros da tabela de simbolos
-
-    // Pega procedimento para printar infos da saida dele
-    variavelDestino = getTop(&tabelaSimbolos);
-    printTable(&tabelaSimbolos);
-    if(variavelDestino == NULL) {
-      printf("Procedimento nao encontrado na tabela de simbolos.\n");
-      exit(1);
-    }
-    char command[100];
-    sprintf(command, "RTPR %d, %d", nivel_lexico, num_params);
-    geraCodigo(NULL, command);
-
-    novos_param = 0;
-    nivel_lexico--;
-
-    variavelDestino = NULL; // Libera variavel destino
-    num_vars = old_var;    // Restabelece numero de variaveis no nivel lexico
-    EhSubrotina = 0;
-    pop_pilhaRotulo(&tabelaRotulos, 2);
-  }
-;
-
 parametros_formais_vazio:
 	parametros_formais
 	| comando_vazio;
@@ -335,7 +355,7 @@ parametros_formais_vazio:
 
 parametros_formais:
 ABRE_PARENTESES { num_params = 0; }
-	lista_parametros_formais
+	lista_parametros_formais_ou_vazio
 	FECHA_PARENTESES
 	{
 		stackNode * x = getNth(&tabelaSimbolos, num_params);
@@ -343,6 +363,10 @@ ABRE_PARENTESES { num_params = 0; }
 		updateParams(getNth(&tabelaSimbolos, num_params),
 								&tabelaSimbolos, num_params);
 	}
+;
+
+lista_parametros_formais_ou_vazio:
+	lista_parametros_formais | comando_vazio;
 ;
 
 lista_parametros_formais:
@@ -823,6 +847,7 @@ int main (int argc, char** argv) {
    cria_pilhaTipo(&tabelaTipo);
    cria_pilhaRotulo(&tabelaRotulos);
    cria_pilhaNode(&tabelaNode);
+	 cria_tabelaForward(&tf);
    cur_func = malloc(100);
    receivingByReference = 0;
    proc_declarados = 0;
